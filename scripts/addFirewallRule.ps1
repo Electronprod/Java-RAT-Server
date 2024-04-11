@@ -1,0 +1,1 @@
+New-NetFirewallRule -DisplayName «Allow-SSH» -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow

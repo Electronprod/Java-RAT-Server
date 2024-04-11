@@ -1,0 +1,11 @@
+#tasks_table {
+    -fx-background-color: #f4f4f4;
+    -fx-padding: 10;
+}
+
+#tasks_table .column-header {
+    -fx-background-color: #3498db;
+    -fx-text-fill: WHITE;
+    -fx-font-weight: bold;
+}
+
