@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 
 public class RAT_server extends Application {
 	private static Stage initialStage;
+	private static Scene initialScene;
 	static final Double version = 1.1;
 
 	/**
@@ -50,6 +51,7 @@ public class RAT_server extends Application {
 			System.exit(0);
 		});
 		initialStage = stage;
+		initialScene = scene;
 		stage.show();
 	}
 
@@ -60,6 +62,15 @@ public class RAT_server extends Application {
 	 */
 	public static Stage getInitialStage() {
 		return initialStage;
+	}
+
+	/**
+	 * Get initial JavaFX scene
+	 * 
+	 * @return
+	 */
+	public static Scene getInitialScene() {
+		return initialScene;
 	}
 
 	/*

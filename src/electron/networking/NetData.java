@@ -34,6 +34,7 @@ public class NetData {
 	 */
 	public static void removeClient(SocketHandler client) {
 		clients.remove(client);
+		client = null;
 	}
 
 }

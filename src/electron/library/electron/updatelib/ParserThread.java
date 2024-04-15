@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URLConnection;
-
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -49,7 +47,6 @@ class ParserThread extends Thread {
 	 * @return fail/success (false/true)
 	 */
 	public boolean updateData() {
-		URLConnection urlConnection;
 		try {
 			HttpURLConnection con = (HttpURLConnection) lib.url.openConnection();
 			con.setRequestMethod("GET");

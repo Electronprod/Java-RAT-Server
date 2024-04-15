@@ -11,6 +11,7 @@ public class EditPacket {
 		this.content = content;
 	}
 
+	@SuppressWarnings("unchecked")
 	public JSONObject get() {
 		JSONObject main = new JSONObject();
 		main.put("packettype", "4");

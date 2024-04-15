@@ -15,6 +15,7 @@ public class ScriptFilePacket {
 	 * @param action
 	 * @param content
 	 */
+	@SuppressWarnings("unchecked")
 	public ScriptFilePacket(int action, String content) {
 		main.put("packettype", "3");
 		main.put("action", String.valueOf(action));

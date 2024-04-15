@@ -4,7 +4,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
@@ -58,9 +57,13 @@
                   </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
-                        <Button layoutX="424.0" layoutY="5.0" mnemonicParsing="false" onAction="#freezeScreen" text="Freeze" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="80.0" />
+                        <Button layoutX="424.0" layoutY="5.0" mnemonicParsing="false" onAction="#freezeScreen" text="Freeze" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="70.0" />
                         <Button layoutX="533.0" layoutY="5.0" mnemonicParsing="false" onAction="#toggleScreen" text="Toggle" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="10.0" />
-                        <CheckBox fx:id="screen_mode" layoutX="363.0" layoutY="9.0" mnemonicParsing="false" text="Preserve Ratio" AnchorPane.bottomAnchor="6.0" AnchorPane.rightAnchor="139.66666666666669" />
+                        <CheckBox fx:id="screen_mode" layoutX="363.0" layoutY="9.0" mnemonicParsing="false" text="Preserve Ratio" AnchorPane.bottomAnchor="6.0" AnchorPane.rightAnchor="125.0" />
+                        <Button layoutX="14.0" layoutY="4.0" mnemonicParsing="false" onAction="#screen_overlayAction" text="Overlay" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="14.0" />
+                        <Button layoutX="86.0" layoutY="2.0" mnemonicParsing="false" onAction="#screen_blockMouseAction" text="Block mouse" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="75.0" />
+                        <TextField fx:id="screen_keyfield" layoutX="167.0" layoutY="1.0" prefHeight="25.0" prefWidth="108.0" promptText="Keys to enter" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="167.0" />
+                        <Button layoutX="288.0" layoutY="5.0" mnemonicParsing="false" onAction="#screen_sendkeysAction" text="Enter" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="275.0" />
                      </children>
                   </AnchorPane>
               </items>
@@ -211,39 +214,6 @@
             </AnchorPane>
         </content>
       </Tab>
-      <Tab closable="false" onSelectionChanged="#viewChaged" text="MessageBox">
-         <content>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <Label layoutX="14.0" layoutY="14.0" prefHeight="24.0" prefWidth="203.0" text="MessageBox builder" textAlignment="CENTER" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
-                     <font>
-                        <Font name="Calibri Bold" size="24.0" />
-                     </font></Label>
-                  <Text layoutX="13.0" layoutY="64.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Title:" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="46.734375">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                  </Text>
-                  <Text layoutX="13.0" layoutY="93.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text:" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="75.0">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                  </Text>
-                  <TextField fx:id="messagebox_title" layoutX="56.0" layoutY="44.0" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="44.0" />
-                  <TextField fx:id="messagebox_text" layoutX="56.0" layoutY="74.0" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="75.0" />
-                  <Text layoutX="7.0" layoutY="121.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Header:" wrappingWidth="44.020843505859375" AnchorPane.leftAnchor="7.0" AnchorPane.topAnchor="108.05078125" />
-                  <TextField fx:id="messagebox_header" layoutX="56.0" layoutY="104.0" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="104.0" />
-                  <Text layoutX="11.0" layoutY="157.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Type:" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="140.0">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                  </Text>
-                  <ChoiceBox fx:id="messagebox_type" layoutX="56.0" layoutY="139.0" prefWidth="150.0" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="139.0" />
-                  <Button layoutX="94.0" layoutY="172.0" mnemonicParsing="false" onAction="#messagebox_send" text="Send" textAlignment="CENTER" AnchorPane.leftAnchor="94.0" AnchorPane.topAnchor="172.0" />
-                  <TextArea fx:id="messagebox_console" layoutX="246.0" layoutY="17.0" prefHeight="335.0" prefWidth="344.0" />
-               </children></AnchorPane>
-         </content>
-      </Tab>
       <Tab closable="false" onSelectionChanged="#viewChaged" text="Settings">
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -251,16 +221,23 @@
                   <AnchorPane layoutX="14.0" layoutY="14.0" prefHeight="351.0" prefWidth="574.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="4.0" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="4.0">
                      <children>
                         <TextField fx:id="settings_uitimeupdater" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="48.0" promptText="ms" text="1000" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
-                        <Text layoutX="62.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="UI update time" AnchorPane.leftAnchor="68.0" AnchorPane.topAnchor="20.654296875">
+                        <Text layoutX="62.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Main UI update time" AnchorPane.leftAnchor="68.0" AnchorPane.topAnchor="20.654296875">
                            <font>
                               <Font name="Cambria Math" size="12.0" />
                            </font>
                         </Text>
-                        <CheckBox fx:id="settings_screenv2" layoutX="14.0" layoutY="47.0" mnemonicParsing="false" text="ScreenV2 " AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="47.0">
+                        <CheckBox fx:id="settings_screenv2" layoutX="14.0" layoutY="47.0" mnemonicParsing="false" text="Enable ScreenV2 (Feature is in developing)" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="47.0">
                            <font>
                               <Font name="Cambria Math" size="12.0" />
                            </font>
                         </CheckBox>
+                        <CheckBox fx:id="settings_contextmenurexplorer" layoutX="14.0" layoutY="73.0" mnemonicParsing="false" text="Disable context menu restrictions (Explorer)" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="70.0">
+                           <font>
+                              <Font name="Cambria Math" size="12.0" />
+                           </font>
+                        </CheckBox>
+                        <Button layoutX="14.0" layoutY="168.0" mnemonicParsing="false" onAction="#settings_launchPlayerGui" prefHeight="25.0" prefWidth="259.0" text="Launch sound gui" />
+                        <Button layoutX="14.0" layoutY="134.0" mnemonicParsing="false" onAction="#settings_createParentScreen" text="Create parent screen stage (At one's own risk)" />
                      </children>
                   </AnchorPane>
                </children></AnchorPane>

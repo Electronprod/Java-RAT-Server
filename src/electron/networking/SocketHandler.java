@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
@@ -18,6 +19,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import electron.gui.NotepadControls;
+import electron.gui.PlayerControls;
 import electron.networking.packets.*;
 
 public class SocketHandler extends Thread {
@@ -141,6 +143,13 @@ public class SocketHandler extends Thread {
 			});
 		} else if (Utils.isPacketType(8, input)) {
 			receiveMicrofone(input);
+		} else if (Utils.isPacketType(9, input)) {
+			// SoundPacket
+			PlayerControls.createPlayerUI();
+			JSONArray sounds = (JSONArray) input.get("list");
+			List<String> soundsToShow = new ArrayList();
+			soundsToShow.addAll(sounds);
+			PlayerControls.updatePlayerList(soundsToShow);
 		} else {
 			// It's unknown packet
 			logger.warn("[electron.networking.SocketHandler.receiver][" + Thread.currentThread().getName()
@@ -157,7 +166,7 @@ public class SocketHandler extends Thread {
 	}
 
 	private void receiveMicrofone(JSONObject input) {
-		String soundData = String.valueOf(input.get("content"));
+		// String soundData = String.valueOf(input.get("content"));
 		// In developing
 	}
 
@@ -196,7 +205,7 @@ public class SocketHandler extends Thread {
 	 * 
 	 * @return BufferedImage
 	 */
-	public BufferedImage getScreen() {
+	public synchronized BufferedImage getScreen() {
 		return screen;
 	}
 
@@ -246,7 +255,7 @@ public class SocketHandler extends Thread {
 	}
 
 	/**
-	 * Send data to remote client
+	 * Sends data to remote client
 	 * 
 	 * @param data - String to send
 	 * @return boolean
