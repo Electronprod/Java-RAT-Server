@@ -106,7 +106,7 @@ public class Utils {
 		}
 	}
 
-	public static void showErrorMessage(String title, String header, String message) {
+	public static void showErrorMessage(String title, String header, String message, boolean isWeb) {
 		Platform.runLater(() -> {
 			Alert al = new Alert(AlertType.ERROR);
 			al.setTitle(title);
@@ -116,7 +116,7 @@ public class Utils {
 		});
 	}
 
-	public static void showMessage(String title, String header, String message) {
+	public static void showMessage(String title, String header, String message, boolean isWeb) {
 		Platform.runLater(() -> {
 			Alert al = new Alert(AlertType.INFORMATION);
 			al.setTitle(title);
@@ -124,5 +124,9 @@ public class Utils {
 			al.setContentText(message);
 			al.show();
 		});
+	}
+
+	public static String removeLastChar(String str) {
+		return str.substring(0, str.length() - 1);
 	}
 }

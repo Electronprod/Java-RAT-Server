@@ -21,7 +21,7 @@
 
 <TabPane fx:id="connections_tabpane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="electron.gui.MainWindowControls">
   <tabs>
-      <Tab closable="false" onSelectionChanged="#viewChaged" text="Connections">
+      <Tab closable="false" text="Connections">
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
@@ -81,7 +81,7 @@
             </AnchorPane>
          </content>
       </Tab>
-    <Tab closable="false" onSelectionChanged="#viewChaged" text="Explorer">
+    <Tab closable="false" text="Explorer">
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
@@ -129,7 +129,7 @@
                </children></AnchorPane>
       </content>
     </Tab>
-      <Tab text="Tasks">
+      <Tab fx:id="tab_taskmgr" text="Tasks">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
@@ -150,8 +150,9 @@
                      <contextMenu>
                         <ContextMenu>
                           <items>
-                            <MenuItem mnemonicParsing="false" onAction="#tasks_killAction" text="Kill" />
-                          	<MenuItem mnemonicParsing="false" onAction="#tasks_copyProcInfo" text="Copy" />
+                            <MenuItem mnemonicParsing="false" onAction="#tasks_killAction" text="Kill by PID" />
+                            <MenuItem mnemonicParsing="false" onAction="#tasks_killNameAction" text="Kill by Name" />
+                          	<MenuItem mnemonicParsing="false" onAction="#tasks_copyProcInfo" text="Copy to chipoard" />
                           </items>
                         </ContextMenu>
                      </contextMenu>
@@ -176,7 +177,7 @@
             </AnchorPane>
         </content>
       </Tab>
-      <Tab closable="false" onSelectionChanged="#viewChaged" text="Console">
+      <Tab closable="false" text="Console">
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
@@ -194,7 +195,7 @@
                </children></AnchorPane>
          </content>
       </Tab>
-      <Tab closable="false" text="Script">
+      <Tab fx:id="tab_scripts" closable="false" text="Script">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
@@ -214,7 +215,7 @@
             </AnchorPane>
         </content>
       </Tab>
-      <Tab closable="false" onSelectionChanged="#viewChaged" text="Settings">
+      <Tab closable="false" text="Settings">
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>

