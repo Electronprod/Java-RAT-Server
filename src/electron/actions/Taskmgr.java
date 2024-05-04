@@ -25,6 +25,14 @@ public class Taskmgr {
 		}
 	}
 
+	public static void killProcess_NAME(String name, SocketHandler handler, boolean isWeb) {
+		OutputPacket.sendOutPacket("taskkill /im " + name + " /f", handler, isWeb);
+	}
+
+	public static void killProcess_PID(String pid, SocketHandler handler, boolean isWeb) {
+		OutputPacket.sendOutPacket("taskkill /pid " + pid + " /t /f", handler, isWeb);
+	}
+
 	public static void requestData(SocketHandler handler, boolean fastmode, boolean isWeb) {
 		if (fastmode) {
 			OutputPacket.sendOutPacket("/tasklistfast", handler, isWeb);

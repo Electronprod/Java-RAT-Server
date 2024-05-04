@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>FullScreen</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="https://i.imgur.com/CsVKESW.jpg">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<style type="text/css">
+		#id {
+			margin: 0;
+			padding: 0;
+			height: 100vh;
+		}
+	</style>
+</head>
+
+<body>
+	<img id="screenimg">
+</body>
+<script>
+	const socket = window.location.href.split("?socket=")[1];
+	setInterval(updateScreen, 1000);
+	function updateScreen() {
+		let url = "/api/screen?socket=" + socket;
+		fetch(url)
+			.then(response => response.blob())
+			.then(blob => {
+				const imageUrl = URL.createObjectURL(blob);
+				const imageElement = document.getElementById("screenimg");
+				imageElement.src = imageUrl;
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	}
+</script>
+
+</html>

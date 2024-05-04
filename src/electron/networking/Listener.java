@@ -51,7 +51,7 @@ public class Listener extends Thread {
 					socketHander.start();
 				}
 			} catch (IOException e) {
-				logger.error("[electron.networking.Listener]: I/O cautght: " + e.getMessage());
+				logger.error("[electron.networking.Listener]: I/O caught: " + e.getMessage());
 			}
 		}
 	}

