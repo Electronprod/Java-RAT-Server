@@ -56,7 +56,7 @@ class API_GetConnections implements HttpHandler {
 				socket.put("col3", handler.getInfo().getOs());
 				socket.put("col4", handler.getInfo().getCountry());
 				socket.put("col5", handler.getInfo().getNativeimage());
-				socket.put("col6", "Developing...");
+				socket.put("col6", handler.getInfo().getHeadless());
 				TreeMap<String, Object> sortedJsonObject = new TreeMap<>(socket);
 				arr.add(sortedJsonObject);
 			}

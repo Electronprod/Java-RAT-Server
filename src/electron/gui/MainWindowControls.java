@@ -71,6 +71,8 @@ public class MainWindowControls {
 	@FXML
 	private TableColumn<ClientInfo, String> connections_table_nativeimagecolumn;
 	@FXML
+	private TableColumn<ClientInfo, String> connections_table_headlesscolumn;
+	@FXML
 	private Text tasks_time;
 	@FXML
 	private TableView<ProcessPacket> tasks_table;
@@ -232,6 +234,10 @@ public class MainWindowControls {
 		});
 		connections_table_nativeimagecolumn.setCellValueFactory(cellData -> {
 			SimpleStringProperty addressProperty = cellData.getValue().NativeImageProperty();
+			return addressProperty != null ? addressProperty : new SimpleStringProperty("");
+		});
+		connections_table_headlesscolumn.setCellValueFactory(cellData -> {
+			SimpleStringProperty addressProperty = cellData.getValue().HeadlessProperty();
 			return addressProperty != null ? addressProperty : new SimpleStringProperty("");
 		});
 		connections_table.setItems(info);

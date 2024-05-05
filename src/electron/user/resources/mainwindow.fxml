@@ -29,9 +29,10 @@
                     <columns>
                       <TableColumn fx:id="connections_table_addresscolumn" prefWidth="152.66668701171875" text="ADDRESS" />
                       <TableColumn fx:id="connections_table_usercolumn" prefWidth="120.66665649414062" text="USER" />
-                        <TableColumn fx:id="connections_table_oscolumn" prefWidth="160.00006103515625" text="OS" />
-                        <TableColumn fx:id="connections_table_countrycolumn" prefWidth="78.0" text="COUNTRY" />
-                        <TableColumn fx:id="connections_table_nativeimagecolumn" prefWidth="53.33331298828125" text="NATIVE" />
+                        <TableColumn fx:id="connections_table_oscolumn" prefWidth="90.66668701171875" text="OS" />
+                        <TableColumn fx:id="connections_table_countrycolumn" prefWidth="78.6666259765625" text="COUNTRY" />
+                        <TableColumn fx:id="connections_table_nativeimagecolumn" prefWidth="62.00006103515625" text="NATIVE" />
+                        <TableColumn fx:id="connections_table_headlesscolumn" prefWidth="66.6666259765625" text="HEADLESS" />
                     </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

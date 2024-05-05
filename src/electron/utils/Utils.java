@@ -156,7 +156,7 @@ public class Utils {
 		}
 	}
 
-	private static boolean isMultiCommand(String commandname, String command) {
+	public static boolean isMultiCommand(String commandname, String command) {
 		if (!command.contains(" ")) {
 			return false;
 		}
@@ -169,7 +169,7 @@ public class Utils {
 		return true;
 	}
 
-	private static String[] getCommandArgs(String in) {
+	public static String[] getCommandArgs(String in) {
 		String[] spl = in.split(" ");
 		return spl;
 	}

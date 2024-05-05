@@ -23,6 +23,9 @@ import electron.web.pages.TaskmgrPageHandler;
 import com.sun.net.httpserver.HttpServer;
 
 @SuppressWarnings("restriction")
+/**
+ * WebSite main class
+ */
 public class Loader {
 	private static int port = 80;
 	private static HttpServer server;
@@ -33,14 +36,17 @@ public class Loader {
 		port = port1;
 	}
 
-	public static String getLogin() {
+	private static String getLogin() {
 		return login;
 	}
 
-	public static String getPassword() {
+	private static String getPassword() {
 		return password;
 	}
 
+	/**
+	 * Starts WebSite
+	 */
 	public static void launch() {
 		launchAuth();
 		try {
@@ -64,6 +70,9 @@ public class Loader {
 		}
 	}
 
+	/**
+	 * Initializing the authentication data store
+	 */
 	@SuppressWarnings("unchecked")
 	private static void launchAuth() {
 		File authfile = new File("auth.json");
@@ -90,6 +99,12 @@ public class Loader {
 		}
 	}
 
+	/**
+	 * Adds IP to authed list
+	 * 
+	 * @param HttpExchange exchange
+	 * @return success/fail
+	 */
 	public static boolean addAuthed(com.sun.net.httpserver.HttpExchange exchange) {
 		String url = WebUtils.getUrl(exchange);
 		if (!url.contains("?login=")) {
@@ -131,6 +146,12 @@ public class Loader {
 		return true;
 	}
 
+	/**
+	 * Checks IP in authed list
+	 * 
+	 * @param HttpExchange exchange
+	 * @return success/fail
+	 */
 	public static boolean isAuthed(com.sun.net.httpserver.HttpExchange exchange) {
 		try {
 			JSONObject main = (JSONObject) FileOptions.ParseJsThrought(FileOptions.getFileLine(new File("auth.json")));
@@ -153,6 +174,12 @@ public class Loader {
 		}
 	}
 
+	/**
+	 * Shortcut for sending auth page
+	 * 
+	 * @param HttpExchange exchange
+	 * @return success/fail
+	 */
 	public static boolean checkAuth(com.sun.net.httpserver.HttpExchange exchange) {
 		if (isAuthed(exchange)) {
 			return true;

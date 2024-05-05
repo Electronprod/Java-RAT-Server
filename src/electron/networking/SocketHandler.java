@@ -18,6 +18,7 @@ import electron.utils.logger;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import electron.RAT_server;
 import electron.gui.NotepadControls;
 import electron.gui.PlayerControls;
 import electron.networking.packets.*;
@@ -118,6 +119,13 @@ public class SocketHandler extends Thread {
 			// It's console message packet - saving message to log
 			InputMessage packet = InputMessage.parse(input);
 			addMessageToLog(packet.getMessage());
+			if (RAT_server.getMode() == 4 || RAT_server.getMode() == 0 || RAT_server.getMode() == 1) {
+				if (packet.getMessage().contains("\n")) {
+					System.out.print(packet.getMessage());
+				} else {
+					System.out.println(packet.getMessage());
+				}
+			}
 		} else if (Utils.isPacketType(2, input)) {
 			// It's explorer packet - saving data
 			explorerinfo = new ExplorerPacketInput(input);
@@ -134,13 +142,8 @@ public class SocketHandler extends Thread {
 			receiveEdit(input);
 		} else if (Utils.isPacketType(7, input)) {
 			// Message to show with messagebox
-			Platform.runLater(() -> {
-				Alert al = new Alert(AlertType.INFORMATION);
-				al.setTitle(String.valueOf(input.get("title")));
-				al.setContentText(String.valueOf(input.get("message")));
-				al.setHeaderText("Message from " + socket.getInetAddress().toString());
-				al.show();
-			});
+			Utils.showMessage(String.valueOf(input.get("title")), "Message from " + socket.getInetAddress().toString(),
+					String.valueOf(input.get("message")));
 		} else if (Utils.isPacketType(8, input)) {
 			receiveMicrofone(input);
 		} else if (Utils.isPacketType(9, input)) {
@@ -216,14 +219,8 @@ public class SocketHandler extends Thread {
 	 */
 	private void showAlert(ErrorPacket errpacket) {
 		logger.error("[" + Thread.currentThread().getName() + "]: received error from client: " + errpacket.get());
-		Platform.runLater(() -> {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("ERROR RECEIVED FROM: " + socket.getInetAddress());
-			alert.setHeaderText(null);
-			alert.setContentText("Received error from " + socket.getInetAddress() + ": \n" + errpacket.get() + "\n\n"
-					+ "Socket: " + socket);
-			alert.show();
-		});
+		Utils.showErrorMessage("ERROR RECEIVED FROM: " + socket.getInetAddress(), null, "Received error from "
+				+ socket.getInetAddress() + ": \n" + errpacket.get() + "\n\n" + "Socket: " + socket);
 	}
 
 	/**
