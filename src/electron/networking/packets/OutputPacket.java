@@ -26,13 +26,12 @@ public class OutputPacket {
 	 * @param message - command to send
 	 * @return boolean
 	 */
-	public static boolean sendOutPacket(String message, SocketHandler handler, boolean isWeb) {
+	public static boolean sendOutPacket(String message, SocketHandler handler) {
 		OutputPacket packet = new OutputPacket(message);
 		// Sending it to selected client
 		if (!handler.send(packet.get())) {
 			logger.error("[electron.networking.packets.sendOutPacket]: error sending packet. Data: " + packet.get());
-			Utils.showErrorMessage("Error sending packet", "Network error", "Error sending data to remote client.",
-					isWeb);
+			Utils.showErrorMessage("Error sending packet", "Network error", "Error sending data to remote client.");
 			return false;
 		}
 		return true;

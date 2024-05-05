@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Auth</title>
+	<link rel="icon" href="https://i.imgur.com/CsVKESW.jpg">
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f9f9f9;
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+		}
+
+		.container {
+			max-width: 400px;
+			background-color: #fff;
+			padding: 20px;
+			border-radius: 5px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		h1 {
+			text-align: center;
+			color: #333;
+		}
+
+		input[type="text"],
+		input[type="password"],
+		button {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 10px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box;
+		}
+
+		button {
+			background-color: #007bff;
+			color: #fff;
+			font-size: 16px;
+			cursor: pointer;
+		}
+
+		button:hover {
+			background-color: #0056b3;
+		}
+
+		img {
+			max-width: 100px;
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div>
+		<img src="https://i.imgur.com/CsVKESW.jpg" alt="Logo">
+	</div>
+	<div class="container">
+		<h1>Authorization</h1>
+		<form>
+			<input id="login" type="text" placeholder="Login" required>
+			<input id="pass" type="password" placeholder="Password" required>
+			<button id="btn" type="submit">Submit</button>
+		</form>
+	</div>
+</body>
+<script>
+	document.getElementById("btn").addEventListener("click", function () {
+		var login = document.getElementById("login").value;
+		var pass = document.getElementById("pass").value;
+		let url = "/auth?login=" + login + "&pass=" + pass;
+		fetch(url)
+			.then(response => response.json())
+			.then((data) => {
+				console.log("success");
+			})
+			.catch(error => {
+				console.error(error);
+			});
+	});
+</script>
+
+</html>

@@ -30,7 +30,7 @@ public class PlayerControls {
 			@Override
 			public void run() {
 				while (true) {
-					OutputPacket.sendOutPacket("/player soundpacket", MainWindowControls.handler, false);
+					OutputPacket.sendOutPacket("/player soundpacket", MainWindowControls.handler);
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
@@ -57,12 +57,12 @@ public class PlayerControls {
 
 	@FXML
 	private void stopLast() {
-		OutputPacket.sendOutPacket("/player stoplast", MainWindowControls.handler, false);
+		OutputPacket.sendOutPacket("/player stoplast", MainWindowControls.handler);
 	}
 
 	@FXML
 	private void stopAll() {
-		OutputPacket.sendOutPacket("/player stopall", MainWindowControls.handler, false);
+		OutputPacket.sendOutPacket("/player stopall", MainWindowControls.handler);
 	}
 
 	public static void createPlayerUI() {
@@ -98,6 +98,6 @@ public class PlayerControls {
 	}
 
 	public static void requestPlayerList() {
-		OutputPacket.sendOutPacket("/player soundpacket", MainWindowControls.handler, false);
+		OutputPacket.sendOutPacket("/player soundpacket", MainWindowControls.handler);
 	}
 }

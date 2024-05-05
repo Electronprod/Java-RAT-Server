@@ -302,12 +302,12 @@ public class MainWindowControls {
 	private void script_executeAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		String script = script_code.getText();
 		String type = script_executor.getSelectionModel().getSelectedItem();
-		Scripting.executeScript(handler, script, type, false);
+		Scripting.executeScript(handler, script, type);
 	}
 
 	@FXML
@@ -338,7 +338,7 @@ public class MainWindowControls {
 			return;
 		}
 		tasks_time.setText(handler.getLastTaskmgrDate());
-		Taskmgr.requestData(handler, tasks_fastmode.isSelected(), false);
+		Taskmgr.requestData(handler, tasks_fastmode.isSelected());
 		if (handler.getTaskList() == null) {
 			return;
 		}
@@ -394,7 +394,7 @@ public class MainWindowControls {
 			return;
 		}
 		ProcessPacket packet = tasks_table.getSelectionModel().getSelectedItem();
-		Taskmgr.killProcess_PID(packet, handler, false);
+		Taskmgr.killProcess_PID(packet, handler);
 	}
 
 	@FXML
@@ -403,7 +403,7 @@ public class MainWindowControls {
 			return;
 		}
 		ProcessPacket packet = tasks_table.getSelectionModel().getSelectedItem();
-		Taskmgr.killProcess_NAME(packet, handler, false);
+		Taskmgr.killProcess_NAME(packet, handler);
 	}
 
 	@FXML
@@ -414,7 +414,7 @@ public class MainWindowControls {
 						+ " | " + packet.getSession().getValue() + " | " + packet.getTitle().getValue());
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(stringSelection, null);
-		Utils.showMessage("Success", "Success", "Copied text to chipboard.", false);
+		Utils.showMessage("Success", "Success", "Copied text to chipboard.");
 	}
 
 	/*
@@ -439,33 +439,33 @@ public class MainWindowControls {
 
 	@FXML
 	private void screen_overlayAction() {
-		Misc.toggle_overlay(handler, false);
+		Misc.toggle_overlay(handler);
 	}
 
 	@FXML
 	private void screen_blockMouseAction() {
-		Misc.toggle_blockmouse(handler, false);
+		Misc.toggle_blockmouse(handler);
 	}
 
 	@FXML
 	private void screen_sendkeysAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		String keys = screen_keyfield.getText();
-		Misc.presskeys(handler, keys, false);
+		Misc.presskeys(handler, keys);
 	}
 
 	@FXML
 	private void toggleScreen() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
-		Misc.toggle_screen(handler, false);
+		Misc.toggle_screen(handler);
 	}
 
 	@FXML
@@ -475,7 +475,7 @@ public class MainWindowControls {
 
 	@FXML
 	private void settings_launchPlayerGui() {
-		OutputPacket.sendOutPacket("/player soundpacket", handler, false);
+		OutputPacket.sendOutPacket("/player soundpacket", handler);
 	}
 
 	/*
@@ -498,10 +498,10 @@ public class MainWindowControls {
 	private void toggleScreenV2() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
-		Misc.toggle_screenV2(handler, false);
+		Misc.toggle_screenV2(handler);
 	}
 
 	/*
@@ -547,15 +547,14 @@ public class MainWindowControls {
 	private void explorer_runAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showMessage("Incorrect action", "You must select file to open", "You must select file to open",
-					false);
+			Utils.showMessage("Incorrect action", "You must select file to open", "You must select file to open");
 		} else {
 			String f = explorer_list.getSelectionModel().getSelectedItem();
-			Explorer.runFile(handler, explorer_path.getText(), f, false);
+			Explorer.runFile(handler, explorer_path.getText(), f);
 		}
 	}
 
@@ -563,23 +562,21 @@ public class MainWindowControls {
 	private void explorer_runListenerAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open",
-					false);
+			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open");
 		} else {
 			String f = explorer_list.getSelectionModel().getSelectedItem();
-			Explorer.runListener(handler, explorer_path.getText(), f, false);
+			Explorer.runListener(handler, explorer_path.getText(), f);
 		}
 	}
 
 	@FXML
 	private void explorer_openAction() {
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open",
-					false);
+			Utils.showErrorMessage("Incorrect action", "You must select file to open", "You must select file to open");
 		} else {
 			explorer_path.setText(
 					Explorer.openPath(explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem()));
@@ -592,13 +589,13 @@ public class MainWindowControls {
 		String path = explorer_path.getText();
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		if (System.getProperty("os.name").toLowerCase().contains("windows") == handler.isWindows()) {
 			path = Explorer.getParentNative(path);
 		} else {
-			path = Explorer.getParent(handler, path, false);
+			path = Explorer.getParent(handler, path);
 		}
 		explorer_path.setText(path);
 		sendExplorer();
@@ -608,7 +605,7 @@ public class MainWindowControls {
 	private void explorer_createAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		TextInputDialog td = new TextInputDialog();
@@ -624,12 +621,11 @@ public class MainWindowControls {
 	private void explorer_deleteAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file!", "Select file you want to delete",
-					false);
+			Utils.showErrorMessage("Incorrect action", "You must select file!", "Select file you want to delete");
 		} else {
 			Explorer.deleteFile(handler, explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem());
 		}
@@ -639,20 +635,20 @@ public class MainWindowControls {
 	private void explorer_editAction() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		String result = explorer_path.getText();
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
-			Utils.showErrorMessage("Incorrect action", "You must select file to edit!", "You must select file to edit!",
-					false);
+			Utils.showErrorMessage("Incorrect action", "You must select file to edit!",
+					"You must select file to edit!");
 		} else {
 			if (result.endsWith("/") || result.endsWith("\\")) {
 				result = result + explorer_list.getSelectionModel().getSelectedItem();
 			} else {
 				result = result + "/" + explorer_list.getSelectionModel().getSelectedItem();
 			}
-			OutputPacket.sendOutPacket("/edit=" + result, handler, false);
+			OutputPacket.sendOutPacket("/edit=" + result, handler);
 		}
 	}
 
@@ -680,17 +676,17 @@ public class MainWindowControls {
 	private void explorer_play() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
-		Explorer.play(handler, explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem(), false);
+		Explorer.play(handler, explorer_path.getText(), explorer_list.getSelectionModel().getSelectedItem());
 	}
 
 	@FXML
 	private void explorer_upload() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		// Selecting file to send
@@ -706,7 +702,7 @@ public class MainWindowControls {
 	private void explorer_download() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		if (explorer_list.getSelectionModel().getSelectedItem().isEmpty()) {
@@ -771,12 +767,12 @@ public class MainWindowControls {
 	private void sendCommand() {
 		if (handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
 		String command = console_commandfield.getText();
 		// Creating packet to send
-		OutputPacket.sendOutPacket(command, handler, false);
+		OutputPacket.sendOutPacket(command, handler);
 		handler.addMessageToLog("[SERVER]: sending: " + console_commandfield.getText());
 		console_commandfield.setText("");
 	}

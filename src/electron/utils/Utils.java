@@ -16,6 +16,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import electron.RAT_server;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -106,7 +107,15 @@ public class Utils {
 		}
 	}
 
-	public static void showErrorMessage(String title, String header, String message, boolean isWeb) {
+	public static void showErrorMessage(String title, String header, String message) {
+		if (RAT_server.getMode() == 1 || RAT_server.getMode() == 3 || RAT_server.getMode() == 4) {
+			logger.error("[MESSAGE][ERROR]: ----------------------------");
+			logger.error("[MESSAGE][ERROR]: " + title);
+			logger.error("[MESSAGE][ERROR]: " + header);
+			logger.error("[MESSAGE][ERROR]: " + message);
+			logger.error("[MESSAGE][ERROR]: ----------------------------");
+			return;
+		}
 		Platform.runLater(() -> {
 			Alert al = new Alert(AlertType.ERROR);
 			al.setTitle(title);
@@ -116,7 +125,15 @@ public class Utils {
 		});
 	}
 
-	public static void showMessage(String title, String header, String message, boolean isWeb) {
+	public static void showMessage(String title, String header, String message) {
+		if (RAT_server.getMode() == 1 || RAT_server.getMode() == 3 || RAT_server.getMode() == 4) {
+			logger.error("[MESSAGE]: ----------------------------");
+			logger.error("[MESSAGE]: " + title);
+			logger.error("[MESSAGE]: " + header);
+			logger.error("[MESSAGE]: " + message);
+			logger.error("[MESSAGE]: ----------------------------");
+			return;
+		}
 		Platform.runLater(() -> {
 			Alert al = new Alert(AlertType.INFORMATION);
 			al.setTitle(title);
@@ -128,5 +145,32 @@ public class Utils {
 
 	public static String removeLastChar(String str) {
 		return str.substring(0, str.length() - 1);
+	}
+
+	public static boolean isNumber(String s) {
+		try {
+			Integer.parseInt(s);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	private static boolean isMultiCommand(String commandname, String command) {
+		if (!command.contains(" ")) {
+			return false;
+		}
+		if (!command.contains(commandname)) {
+			return false;
+		}
+		if (!command.contains(commandname + " ")) {
+			return false;
+		}
+		return true;
+	}
+
+	private static String[] getCommandArgs(String in) {
+		String[] spl = in.split(" ");
+		return spl;
 	}
 }

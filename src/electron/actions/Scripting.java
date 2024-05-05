@@ -12,7 +12,7 @@ public class Scripting {
 	 * @param type
 	 * @param isWeb
 	 */
-	public static void executeScript(SocketHandler handler, String script, String type, boolean isWeb) {
+	public static void executeScript(SocketHandler handler, String script, String type) {
 		ScriptFilePacket packet;
 		switch (type) {
 		case "cmd":
@@ -20,7 +20,7 @@ public class Scripting {
 			if (!handler.send(packet.get().toJSONString())) {
 				logger.error("[Scripting.executeScript]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.", isWeb);
+						"Error sending script packet. Caused by SocketHandler.");
 			}
 			return;
 		case "ps1":
@@ -28,7 +28,7 @@ public class Scripting {
 			if (!handler.send(packet.get().toJSONString())) {
 				logger.error("[Scripting.executeScript]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.", isWeb);
+						"Error sending script packet. Caused by SocketHandler.");
 			}
 			return;
 		case "psconsole":
@@ -36,7 +36,7 @@ public class Scripting {
 			if (!handler.send(packet.get().toJSONString())) {
 				logger.error("[electron.gui.MainWindowControls.script_executeAction]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.", isWeb);
+						"Error sending script packet. Caused by SocketHandler.");
 			}
 			return;
 		case "vbs":
@@ -44,7 +44,7 @@ public class Scripting {
 			if (!handler.send(packet.get().toJSONString())) {
 				logger.error("[Scripting.executeScript]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.", isWeb);
+						"Error sending script packet. Caused by SocketHandler.");
 			}
 			return;
 		case "bat":
@@ -52,7 +52,7 @@ public class Scripting {
 			if (!handler.send(packet.get().toJSONString())) {
 				logger.error("[Scripting.executeScript]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.", isWeb);
+						"Error sending script packet. Caused by SocketHandler.");
 			}
 			return;
 		case "js":
@@ -60,12 +60,12 @@ public class Scripting {
 			if (!handler.send(packet.get().toJSONString())) {
 				logger.error("[Scripting.executeScript]: error sending packet.");
 				Utils.showErrorMessage("Socket Error", "Error sending script packet.",
-						"Error sending script packet. Caused by SocketHandler.", isWeb);
+						"Error sending script packet. Caused by SocketHandler.");
 			}
 			return;
 		default:
 			Utils.showErrorMessage("Internal error", "Error",
-					"Internal error in script_executeAction(): switch(script_executor)", isWeb);
+					"Internal error in script_executeAction(): switch(script_executor)");
 		}
 	}
 

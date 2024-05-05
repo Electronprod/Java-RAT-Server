@@ -23,6 +23,7 @@ import electron.networking.packets.ExplorerPacketInput;
 import electron.networking.packets.OutputPacket;
 import electron.networking.packets.ProcessPacket;
 import electron.utils.logger;
+import electron.web.Loader;
 import electron.web.WebUtils;
 import javafx.collections.FXCollections;
 
@@ -36,9 +37,13 @@ public class API {
 	}
 }
 
+@SuppressWarnings("unchecked")
 class API_GetConnections implements HttpHandler {
 	@Override
 	public void handle(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+		if (!Loader.checkAuth(exchange)) {
+			return;
+		}
 		JSONArray arr = new JSONArray();
 		if (!NetData.getClients().isEmpty()) {
 			for (SocketHandler handler : NetData.getClients()) {
@@ -60,9 +65,13 @@ class API_GetConnections implements HttpHandler {
 	}
 }
 
+@SuppressWarnings("unchecked")
 class API_GetSocketAPI implements HttpHandler {
 	@Override
 	public void handle(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+		if (!Loader.checkAuth(exchange)) {
+			return;
+		}
 		// Getting socket
 		String url = WebUtils.getUrl(exchange);
 		SocketHandler handler = WebUtils.defineHandler(url);
@@ -159,7 +168,7 @@ class API_GetSocketAPI implements HttpHandler {
 			return;
 		}
 		String keys = url.split("&keys=")[1];
-		Misc.presskeys(handler, keys, true);
+		Misc.presskeys(handler, keys);
 		JSONObject answer = new JSONObject();
 		answer.put("message", "202 - accepted");
 		WebUtils.sendResponse(exchange, answer.toJSONString(), 202);
@@ -208,7 +217,7 @@ class API_GetSocketAPI implements HttpHandler {
 		}
 		String command = url.split("&command=")[1];
 		handler.addMessageToLog("[SERVER]: sending: " + command);
-		if (OutputPacket.sendOutPacket(command, handler, true)) {
+		if (OutputPacket.sendOutPacket(command, handler)) {
 			JSONObject answer = new JSONObject();
 			answer.put("message", "202 - accepted");
 			WebUtils.sendResponse(exchange, answer.toJSONString(), 202);
@@ -233,10 +242,10 @@ class API_GetSocketAPI implements HttpHandler {
 		answer.put("message", "202 - accepted");
 		try {
 			if (isPid) {
-				Taskmgr.killProcess_PID(proc.split(",")[0], handler, true);
+				Taskmgr.killProcess_PID(proc.split(",")[0], handler);
 				WebUtils.sendResponse(exchange, answer.toJSONString(), 202);
 			} else {
-				Taskmgr.killProcess_NAME(proc.split(",")[1], handler, true);
+				Taskmgr.killProcess_NAME(proc.split(",")[1], handler);
 				WebUtils.sendResponse(exchange, answer.toJSONString(), 202);
 			}
 		} catch (Exception e) {
@@ -253,7 +262,7 @@ class API_GetSocketAPI implements HttpHandler {
 			JSONObject erranswer = new JSONObject();
 			erranswer.put("message", "523 - tasklist is empty");
 			WebUtils.sendResponse(exchange, erranswer.toJSONString(), 523);
-			Taskmgr.requestData(handler, isFast, true);
+			Taskmgr.requestData(handler, isFast);
 			return;
 		}
 		JSONArray arr = new JSONArray();
@@ -270,6 +279,6 @@ class API_GetSocketAPI implements HttpHandler {
 			arr.add(sortedJsonObject);
 		}
 		WebUtils.sendResponse(exchange, arr.toJSONString(), 200);
-		Taskmgr.requestData(handler, isFast, true);
+		Taskmgr.requestData(handler, isFast);
 	}
 }
