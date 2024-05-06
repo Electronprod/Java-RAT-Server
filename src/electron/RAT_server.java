@@ -33,6 +33,7 @@ public class RAT_server extends Application {
 	 */
 	public static void main(String[] args) {
 		int inputmode = 0;
+		int listenerport = 50000;
 		try {
 			if (GraphicsEnvironment.isHeadless()) {
 				inputmode = 5;
@@ -46,6 +47,9 @@ public class RAT_server extends Application {
 						if (key.toLowerCase().equals("mode")) {
 							inputmode = Integer.valueOf(value);
 						}
+						if (key.toLowerCase().equals("listenerport")) {
+							listenerport = Integer.valueOf(value);
+						}
 					}
 				}
 			}
@@ -54,7 +58,7 @@ public class RAT_server extends Application {
 		}
 		logger.log("Starting application in mode: " + inputmode);
 		// Starting network listener
-		new Listener(50000).start();
+		new Listener(listenerport).start();
 		new ScreenV2Receiver().start();
 		Utils.loadDir(new File("scripts"));
 		switch (inputmode) {
