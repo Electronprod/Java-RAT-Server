@@ -63,8 +63,9 @@
                         <CheckBox fx:id="screen_mode" layoutX="363.0" layoutY="9.0" mnemonicParsing="false" text="Preserve Ratio" AnchorPane.bottomAnchor="6.0" AnchorPane.rightAnchor="125.0" />
                         <Button layoutX="14.0" layoutY="4.0" mnemonicParsing="false" onAction="#screen_overlayAction" text="Overlay" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="14.0" />
                         <Button layoutX="86.0" layoutY="2.0" mnemonicParsing="false" onAction="#screen_blockMouseAction" text="Block mouse" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="75.0" />
-                        <TextField fx:id="screen_keyfield" layoutX="167.0" layoutY="1.0" prefHeight="25.0" prefWidth="108.0" promptText="Keys to enter" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="167.0" />
-                        <Button layoutX="288.0" layoutY="5.0" mnemonicParsing="false" onAction="#screen_sendkeysAction" text="Enter" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="275.0" />
+                        <TextField fx:id="screen_keyfield" layoutX="167.0" layoutY="1.0" prefHeight="25.0" prefWidth="87.0" promptText="Keys to enter" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="167.0" />
+                        <Button layoutX="255.0" layoutY="5.0" mnemonicParsing="false" onAction="#screen_sendkeysAction" text="Enter" AnchorPane.bottomAnchor="1.6666666666666679" AnchorPane.leftAnchor="255.0" />
+                        <CheckBox fx:id="screen_mouse" layoutX="300.0" layoutY="9.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="63.0" text="Mouse" AnchorPane.bottomAnchor="6.0" AnchorPane.rightAnchor="230.0" />
                      </children>
                   </AnchorPane>
               </items>

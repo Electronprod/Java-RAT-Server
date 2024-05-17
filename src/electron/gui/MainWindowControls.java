@@ -37,6 +37,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -121,6 +122,8 @@ public class MainWindowControls {
 	@FXML
 	private CheckBox screen_mode;
 	@FXML
+	private CheckBox screen_mouse;
+	@FXML
 	private TextField screen_keyfield;
 	@FXML
 	private ImageView screenv2_image;
@@ -195,6 +198,16 @@ public class MainWindowControls {
 			}
 		};
 		new Thread(updateRunnable).start();
+		screen_image.setOnMouseMoved(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (handler == null || !screen_mouse.isSelected())
+					return;
+				// /setmouse <x> <y> <xb> <yb>
+				OutputPacket.sendOutPacket("/setmouse " + event.getX() + " " + event.getY() + " "
+						+ screen_image.getFitWidth() + " " + screen_image.getFitHeight(), handler);
+			}
+		});
 	}
 
 	public void updateClients() {

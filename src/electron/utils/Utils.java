@@ -34,6 +34,10 @@ public class Utils {
 		return obj;
 	}
 
+	public static double map(double value, double fromLow, double fromHigh, double toLow, double toHigh) {
+		return Math.round((value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow);
+	}
+
 	/**
 	 * Checks if it's the right packet
 	 * 
