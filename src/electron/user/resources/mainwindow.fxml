@@ -72,17 +72,6 @@
             </SplitPane>
          </content>
       </Tab>
-      <Tab fx:id="tab_screenv2" closable="false" text="ScreenV2">
-         <content>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <Button layoutX="514.0" layoutY="344.0" mnemonicParsing="false" onAction="#freezeScreenV2" prefHeight="19.0" prefWidth="71.0" text="Freeze" textAlignment="CENTER" AnchorPane.bottomAnchor="1.3333333333333535" AnchorPane.rightAnchor="14.666666666666671" />
-                  <Button layoutX="455.0" layoutY="344.0" mnemonicParsing="false" onAction="#toggleScreenV2" text="Toggle" AnchorPane.bottomAnchor="1.3333333333333535" AnchorPane.rightAnchor="93.0" />
-                  <ImageView fx:id="screenv2_image" fitHeight="323.0" fitWidth="574.0" layoutX="14.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="33.666666666666686" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="13.333333333333371" />
-               </children>
-            </AnchorPane>
-         </content>
-      </Tab>
     <Tab closable="false" text="Explorer">
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -229,11 +218,6 @@
                               <Font name="Cambria Math" size="12.0" />
                            </font>
                         </Text>
-                        <CheckBox fx:id="settings_screenv2" layoutX="14.0" layoutY="47.0" mnemonicParsing="false" text="Enable ScreenV2 (Feature is in developing)" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="47.0">
-                           <font>
-                              <Font name="Cambria Math" size="12.0" />
-                           </font>
-                        </CheckBox>
                         <CheckBox fx:id="settings_contextmenurexplorer" layoutX="14.0" layoutY="73.0" mnemonicParsing="false" text="Disable context menu restrictions (Explorer)" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="70.0">
                            <font>
                               <Font name="Cambria Math" size="12.0" />

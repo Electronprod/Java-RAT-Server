@@ -6,7 +6,6 @@ import java.net.URL;
 
 import electron.console.Console;
 import electron.networking.Listener;
-import electron.networking.ScreenV2Receiver;
 import electron.utils.Utils;
 import electron.utils.logger;
 import electron.web.Loader;
@@ -59,7 +58,6 @@ public class RAT_server extends Application {
 		logger.log("Starting application in mode: " + inputmode);
 		// Starting network listener
 		new Listener(listenerport).start();
-		new ScreenV2Receiver().start();
 		Utils.loadDir(new File("scripts"));
 		switch (inputmode) {
 		case 0:

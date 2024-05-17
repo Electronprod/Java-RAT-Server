@@ -15,7 +15,6 @@ import electron.actions.Misc;
 import electron.actions.Scripting;
 import electron.actions.Taskmgr;
 import electron.networking.NetData;
-import electron.networking.ScreenV2Receiver;
 import electron.networking.SocketHandler;
 import electron.networking.packets.ClientInfo;
 import electron.networking.packets.ProcessPacket;
@@ -126,15 +125,11 @@ public class MainWindowControls {
 	@FXML
 	private TextField screen_keyfield;
 	@FXML
-	private ImageView screenv2_image;
-	@FXML
 	private TextArea script_code;
 	@FXML
 	private ChoiceBox<String> script_executor;
 	@FXML
 	private TextField settings_uitimeupdater;
-	@FXML
-	private CheckBox settings_screenv2;
 	@FXML
 	private CheckBox settings_contextmenurexplorer;
 
@@ -179,7 +174,6 @@ public class MainWindowControls {
 				while (true) {
 					Platform.runLater(() -> {
 						viewChaged();
-						tab_screenv2.setDisable(!settings_screenv2.isSelected());
 					});
 					try {
 						Thread.currentThread().sleep(Integer.parseInt(settings_uitimeupdater.getText()));
@@ -305,8 +299,6 @@ public class MainWindowControls {
 			updateExplorer();
 		} else if (tabName.equals("Screen")) {
 			updateScreen();
-		} else if (tabName.equals("ScreenV2")) {
-			updateScreenV2();
 		} else if (tabName.equals("Tasks")) {
 			updateTasks();
 		} else {
@@ -495,32 +487,6 @@ public class MainWindowControls {
 	@FXML
 	private void settings_launchPlayerGui() {
 		OutputPacket.sendOutPacket("/player soundpacket", handler);
-	}
-
-	/*
-	 * ScreenV2 Tab Controls
-	 */
-	private void updateScreenV2() {
-		if (handler == null || ScreenV2Receiver.getImage() == null) {
-			return;
-		}
-		WritableImage img = SwingFXUtils.toFXImage(ScreenV2Receiver.getImage(), null);
-		screenv2_image.setImage(img);
-	}
-
-	@FXML
-	private void freezeScreenV2() {
-		FreezeScreenImage.paint(ScreenV2Receiver.getImage());
-	}
-
-	@FXML
-	private void toggleScreenV2() {
-		if (handler == null) {
-			Utils.showErrorMessage("Incorrect action", "You must select client first!",
-					"Select client in 'Connections' pane firstly.");
-			return;
-		}
-		Misc.toggle_screenV2(handler);
 	}
 
 	/*
