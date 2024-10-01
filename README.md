@@ -1,5 +1,11 @@
 # About Java RAT Server
 It's control application for [Java RAT project](https://github.com/Electronprod/Java-RAT).
+# Installation Guide
+1. Download Java-RAT Server from the releases page.
+2. Make sure you have Java 8 installed (higher versions will not work)
+3. Open port 50000 for incoming and outgoing requests
+4. Run the application with Java 8
+
 # Screenshots
 <img width="448" alt="image" src="https://github.com/Electronprod/Java-RAT-Server/assets/80621922/4c1a50e9-9e37-4bca-a037-6f691047bffd">
 <img width="448" alt="image" src="https://github.com/Electronprod/Java-RAT-Server/assets/80621922/5ab9bb1d-abc5-46c5-beaa-a40d314b252e">
